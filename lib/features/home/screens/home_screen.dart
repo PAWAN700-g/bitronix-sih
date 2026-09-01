@@ -7,6 +7,7 @@ import '../widgets/filtration_process_card.dart';
 import '../widgets/greeting_header.dart';
 import '../widgets/purity_card.dart';
 import '../widgets/sensor_grid.dart';
+import '../widgets/water_safety_recommendation_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -64,6 +65,13 @@ class HomeScreen extends ConsumerWidget {
 
                   // 2x2 Sensor Grid
                   SensorGrid(
+                    reading: reading,
+                    result: qualityResult,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Water Safety Diagnostic & Solution Card (New Requirement)
+                  WaterSafetyRecommendationCard(
                     reading: reading,
                     result: qualityResult,
                   ),
