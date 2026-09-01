@@ -18,6 +18,7 @@ void main() {
         ph: 7.2,
         tds: 150.0,
         turbidity: 0.5,
+        salinity: 0.2,
         temperature: 24.0,
       );
 
@@ -28,6 +29,7 @@ void main() {
       expect(result.phStatus, equals(SensorStatus.normal));
       expect(result.tdsStatus, equals(SensorStatus.good));
       expect(result.turbidityStatus, equals(SensorStatus.normal));
+      expect(result.salinityStatus, equals(SensorStatus.normal));
       expect(result.tempStatus, equals(SensorStatus.normal));
       expect(result.hasAlerts, isFalse);
     });
@@ -39,6 +41,7 @@ void main() {
         ph: 5.8,
         tds: 650.0,
         turbidity: 9.2,
+        salinity: 1.8,
         temperature: 26.0,
       );
 

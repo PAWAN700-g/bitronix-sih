@@ -40,5 +40,6 @@ class AppColors {
   static const Color phColor = Color(0xFF8B5CF6);        // Purple
   static const Color tdsColor = Color(0xFF3B82F6);       // Blue
   static const Color turbidityColor = Color(0xFF14B8A6); // Teal
+  static const Color salinityColor = Color(0xFF06B6D4);  // Cyan
   static const Color tempColor = Color(0xFFF97316);      // Orange
 }

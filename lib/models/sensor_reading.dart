@@ -4,6 +4,7 @@ class SensorReading {
   final double ph;
   final double tds;
   final double turbidity;
+  final double salinity;
   final double temperature;
 
   const SensorReading({
@@ -12,6 +13,7 @@ class SensorReading {
     required this.ph,
     required this.tds,
     required this.turbidity,
+    this.salinity = 0.2,
     required this.temperature,
   });
 
@@ -21,6 +23,7 @@ class SensorReading {
     double? ph,
     double? tds,
     double? turbidity,
+    double? salinity,
     double? temperature,
   }) {
     return SensorReading(
@@ -29,6 +32,7 @@ class SensorReading {
       ph: ph ?? this.ph,
       tds: tds ?? this.tds,
       turbidity: turbidity ?? this.turbidity,
+      salinity: salinity ?? this.salinity,
       temperature: temperature ?? this.temperature,
     );
   }
@@ -40,6 +44,7 @@ class SensorReading {
       'ph': ph,
       'tds': tds,
       'turbidity': turbidity,
+      'salinity': salinity,
       'temperature': temperature,
     };
   }
@@ -51,6 +56,7 @@ class SensorReading {
       ph: (json['ph'] as num).toDouble(),
       tds: (json['tds'] as num).toDouble(),
       turbidity: (json['turbidity'] as num).toDouble(),
+      salinity: (json['salinity'] as num?)?.toDouble() ?? 0.2,
       temperature: (json['temperature'] as num).toDouble(),
     );
   }

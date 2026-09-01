@@ -15,6 +15,7 @@ class MockSensorDataSource implements SensorDataSource {
     ph: 7.2,
     tds: 180.0,
     turbidity: 1.2,
+    salinity: 0.2,
     temperature: 25.4,
   );
 
@@ -29,6 +30,7 @@ class MockSensorDataSource implements SensorDataSource {
       final phFluctuation = (_random.nextDouble() - 0.5) * 0.08;
       final tdsFluctuation = (_random.nextDouble() - 0.5) * 4.0;
       final turbidityFluctuation = (_random.nextDouble() - 0.5) * 0.1;
+      final salinityFluctuation = (_random.nextDouble() - 0.5) * 0.02;
       final tempFluctuation = (_random.nextDouble() - 0.5) * 0.2;
 
       _currentReading = SensorReading(
@@ -37,6 +39,7 @@ class MockSensorDataSource implements SensorDataSource {
         ph: (_currentReading.ph + phFluctuation).clamp(5.5, 9.5),
         tds: (_currentReading.tds + tdsFluctuation).clamp(50.0, 750.0),
         turbidity: (_currentReading.turbidity + turbidityFluctuation).clamp(0.2, 15.0),
+        salinity: (_currentReading.salinity + salinityFluctuation).clamp(0.1, 2.5),
         temperature: (_currentReading.temperature + tempFluctuation).clamp(18.0, 38.0),
       );
 
@@ -72,6 +75,7 @@ class MockSensorDataSource implements SensorDataSource {
     double basePh = 7.3;
     double baseTds = 210.0;
     double baseTurbidity = 1.4;
+    double baseSalinity = 0.25;
     double baseTemp = 24.5;
 
     for (int i = count; i >= 0; i--) {
@@ -79,6 +83,7 @@ class MockSensorDataSource implements SensorDataSource {
       final phNoise = (sin(i) * 0.3) + ((_random.nextDouble() - 0.5) * 0.1);
       final tdsNoise = (cos(i) * 25.0) + ((_random.nextDouble() - 0.5) * 10.0);
       final turbidityNoise = (sin(i * 0.5) * 0.6) + ((_random.nextDouble() - 0.5) * 0.2);
+      final salinityNoise = (sin(i * 0.8) * 0.15) + ((_random.nextDouble() - 0.5) * 0.05);
       final tempNoise = (cos(i * 0.3) * 1.5);
 
       history.add(SensorReading(
@@ -87,6 +92,7 @@ class MockSensorDataSource implements SensorDataSource {
         ph: (basePh + phNoise).clamp(6.2, 8.8),
         tds: (baseTds + tdsNoise).clamp(110.0, 480.0),
         turbidity: (baseTurbidity + turbidityNoise).clamp(0.4, 7.8),
+        salinity: (baseSalinity + salinityNoise).clamp(0.1, 1.8),
         temperature: (baseTemp + tempNoise).clamp(20.0, 32.0),
       ));
     }

@@ -6,6 +6,7 @@ class DeviceModel {
   final bool phSensorActive;
   final bool tdsSensorActive;
   final bool turbiditySensorActive;
+  final bool salinitySensorActive;
   final bool tempSensorActive;
 
   const DeviceModel({
@@ -16,6 +17,7 @@ class DeviceModel {
     this.phSensorActive = true,
     this.tdsSensorActive = true,
     this.turbiditySensorActive = true,
+    this.salinitySensorActive = true,
     this.tempSensorActive = true,
   });
 
@@ -27,6 +29,7 @@ class DeviceModel {
     bool? phSensorActive,
     bool? tdsSensorActive,
     bool? turbiditySensorActive,
+    bool? salinitySensorActive,
     bool? tempSensorActive,
   }) {
     return DeviceModel(
@@ -37,6 +40,7 @@ class DeviceModel {
       phSensorActive: phSensorActive ?? this.phSensorActive,
       tdsSensorActive: tdsSensorActive ?? this.tdsSensorActive,
       turbiditySensorActive: turbiditySensorActive ?? this.turbiditySensorActive,
+      salinitySensorActive: salinitySensorActive ?? this.salinitySensorActive,
       tempSensorActive: tempSensorActive ?? this.tempSensorActive,
     );
   }

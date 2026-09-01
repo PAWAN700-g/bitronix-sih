@@ -32,38 +32,47 @@ class GreetingHeader extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${_getGreeting()}, $userName 👋',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${_getGreeting()}, $userName 👋',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isOnline ? AppColors.excellent : AppColors.critical,
-                        shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isOnline ? AppColors.excellent : AppColors.critical,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      isOnline ? 'Smart Water System Activated' : 'System Offline',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isOnline ? AppColors.excellent : AppColors.critical,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          isOnline ? 'Smart Water System Activated' : 'System Offline',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isOnline ? AppColors.excellent : AppColors.critical,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 12),
 
             // Demo Mode Pill Switch
             InkWell(

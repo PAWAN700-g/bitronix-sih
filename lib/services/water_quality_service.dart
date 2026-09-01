@@ -55,7 +55,24 @@ class WaterQualityService {
       turbidityStatus = SensorStatus.critical;
     }
 
-    // 4. Evaluate Temperature Sub-score & Status
+    // 4. Evaluate Salinity Sub-score & Status
+    double salinityScore = 100.0;
+    SensorStatus salinityStatus = SensorStatus.normal;
+
+    if (reading.salinity <= AppConstants.salinityMaxOptimal) {
+      salinityScore = 100.0;
+      salinityStatus = SensorStatus.normal;
+    } else if (reading.salinity <= AppConstants.salinityMaxAcceptable) {
+      final diff = reading.salinity - AppConstants.salinityMaxOptimal;
+      salinityScore = (100.0 - (diff * 80.0)).clamp(40.0, 100.0);
+      salinityStatus = SensorStatus.warning;
+    } else {
+      final diff = reading.salinity - AppConstants.salinityMaxAcceptable;
+      salinityScore = (60.0 - (diff * 40.0)).clamp(0.0, 60.0);
+      salinityStatus = SensorStatus.critical;
+    }
+
+    // 5. Evaluate Temperature Sub-score & Status
     double tempScore = 100.0;
     SensorStatus tempStatus = SensorStatus.normal;
 
@@ -72,10 +89,11 @@ class WaterQualityService {
     }
 
     // Weighted Overall Calculation
-    // pH: 30%, TDS: 35%, Turbidity: 25%, Temp: 10%
-    final weightedScore = (phScore * 0.30) +
-        (tdsScore * 0.35) +
-        (turbidityScore * 0.25) +
+    // pH: 25%, TDS: 30%, Turbidity: 20%, Salinity: 15%, Temp: 10%
+    final weightedScore = (phScore * 0.25) +
+        (tdsScore * 0.30) +
+        (turbidityScore * 0.20) +
+        (salinityScore * 0.15) +
         (tempScore * 0.10);
 
     final overallScore = clampDouble(weightedScore, 0.0, 100.0).round();
@@ -95,9 +113,11 @@ class WaterQualityService {
     final hasAlerts = phStatus == SensorStatus.critical ||
         tdsStatus == SensorStatus.critical ||
         turbidityStatus == SensorStatus.critical ||
+        salinityStatus == SensorStatus.critical ||
         phStatus == SensorStatus.warning ||
         tdsStatus == SensorStatus.warning ||
-        turbidityStatus == SensorStatus.warning;
+        turbidityStatus == SensorStatus.warning ||
+        salinityStatus == SensorStatus.warning;
 
     return WaterQualityResult(
       overallScore: overallScore,
@@ -105,6 +125,7 @@ class WaterQualityService {
       phStatus: phStatus,
       tdsStatus: tdsStatus,
       turbidityStatus: turbidityStatus,
+      salinityStatus: salinityStatus,
       tempStatus: tempStatus,
       hasAlerts: hasAlerts,
     );

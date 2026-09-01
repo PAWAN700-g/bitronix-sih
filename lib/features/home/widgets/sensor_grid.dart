@@ -20,9 +20,9 @@ class SensorGrid extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.25,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      mainAxisExtent: 115,
       children: [
         // 1. pH Card
         SensorCard(
@@ -54,7 +54,17 @@ class SensorGrid extends StatelessWidget {
           accentColor: AppColors.turbidityColor,
         ),
 
-        // 4. Temperature Card
+        // 4. Salinity Card
+        SensorCard(
+          name: 'Salinity',
+          value: reading.salinity.toStringAsFixed(2),
+          unit: 'ppt',
+          status: result.salinityStatus,
+          icon: Icons.waves_outlined,
+          accentColor: AppColors.salinityColor,
+        ),
+
+        // 5. Temperature Card
         SensorCard(
           name: 'Temperature',
           value: reading.temperature.toStringAsFixed(1),

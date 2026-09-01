@@ -89,6 +89,35 @@ class AlertRepository {
       );
     }
 
+    // Check Salinity
+    if (reading.salinity > AppConstants.salinityMaxAcceptable) {
+      newAlerts.add(
+        AlertModel(
+          id: 'auto_${DateTime.now().millisecondsSinceEpoch}_sal_crit',
+          deviceId: reading.deviceId,
+          severity: AlertSeverity.critical,
+          title: 'HIGH SALINITY DETECTED',
+          description: 'Water salinity is above safe Indian drinking water limits.',
+          sensorValue: '${reading.salinity.toStringAsFixed(2)} ppt',
+          threshold: '${AppConstants.salinityMaxAcceptable} ppt',
+          timestamp: DateTime.now(),
+        ),
+      );
+    } else if (reading.salinity > AppConstants.salinityMaxOptimal) {
+      newAlerts.add(
+        AlertModel(
+          id: 'auto_${DateTime.now().millisecondsSinceEpoch}_sal_warn',
+          deviceId: reading.deviceId,
+          severity: AlertSeverity.warning,
+          title: 'ELEVATED SALINITY LEVEL',
+          description: 'Salinity is slightly above optimal baseline.',
+          sensorValue: '${reading.salinity.toStringAsFixed(2)} ppt',
+          threshold: '${AppConstants.salinityMaxOptimal} ppt',
+          timestamp: DateTime.now(),
+        ),
+      );
+    }
+
     // Check pH
     if (reading.ph < 6.0 || reading.ph > 9.0) {
       newAlerts.add(

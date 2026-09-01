@@ -40,7 +40,7 @@ class SensorCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,18 +49,18 @@ class SensorCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    color: accentColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: accentColor, size: 20),
+                  child: Icon(icon, color: accentColor, size: 18),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    color: statusColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     status.label,
@@ -73,34 +73,42 @@ class SensorCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
             Text(
               name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                fontSize: 12,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  value,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (unit.isNotEmpty) ...[
-                  const SizedBox(width: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
                   Text(
-                    unit,
-                    style: theme.textTheme.bodyMedium,
+                    value,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
                   ),
+                  if (unit.isNotEmpty) ...[
+                    const SizedBox(width: 4),
+                    Text(
+                      unit,
+                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ],
         ),

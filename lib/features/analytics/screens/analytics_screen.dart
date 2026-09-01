@@ -96,7 +96,17 @@ class AnalyticsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      // 5. Temperature Chart
+                      // 5. Salinity Chart
+                      SensorChart(
+                        title: 'Salinity Trend',
+                        unit: 'ppt',
+                        readings: readings,
+                        extractor: (r) => r.salinity,
+                        lineColors: AppColors.salinityColor,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 6. Temperature Chart
                       SensorChart(
                         title: 'Temperature Trend',
                         unit: '°C',

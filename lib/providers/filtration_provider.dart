@@ -16,6 +16,7 @@ final filtrationProvider = StateNotifierProvider<FiltrationNotifier, FiltrationS
     ph: 6.4,
     tds: 450.0,
     turbidity: 8.2,
+    salinity: 1.6,
     temperature: 27.0,
   );
 
@@ -25,6 +26,7 @@ final filtrationProvider = StateNotifierProvider<FiltrationNotifier, FiltrationS
     ph: 7.1,
     tds: 180.0,
     turbidity: 1.1,
+    salinity: 0.25,
     temperature: 25.0,
   );
 
@@ -73,6 +75,7 @@ class FiltrationNotifier extends StateNotifier<FiltrationSession> {
       ph: 6.4,
       tds: 480.0,
       turbidity: 8.5,
+      salinity: 1.8,
       temperature: 27.2,
     );
 
@@ -98,9 +101,9 @@ class FiltrationNotifier extends StateNotifier<FiltrationSession> {
           state: FiltrationState.inProgress,
           progress: 0.3,
         );
-        // Step 1: Turbidity drops
+        // Step 1: Turbidity & Salinity drop
         _ref.read(mockSensorDataSourceProvider).emitReading(
-          dirtyReading.copyWith(turbidity: 4.8, tds: 380.0),
+          dirtyReading.copyWith(turbidity: 4.8, tds: 380.0, salinity: 1.2),
         );
       } else if (step == 2) {
         state = state.copyWith(
@@ -108,7 +111,7 @@ class FiltrationNotifier extends StateNotifier<FiltrationSession> {
         );
         // Step 2: TDS drops further
         _ref.read(mockSensorDataSourceProvider).emitReading(
-          dirtyReading.copyWith(turbidity: 2.2, tds: 260.0, ph: 6.8),
+          dirtyReading.copyWith(turbidity: 2.2, tds: 260.0, ph: 6.8, salinity: 0.6),
         );
       } else if (step == 3) {
         state = state.copyWith(
@@ -116,7 +119,7 @@ class FiltrationNotifier extends StateNotifier<FiltrationSession> {
         );
         // Step 3: Nearly filtered
         _ref.read(mockSensorDataSourceProvider).emitReading(
-          dirtyReading.copyWith(turbidity: 1.4, tds: 200.0, ph: 7.0, temperature: 25.6),
+          dirtyReading.copyWith(turbidity: 1.4, tds: 200.0, ph: 7.0, salinity: 0.35, temperature: 25.6),
         );
       } else if (step >= 4) {
         timer.cancel();
@@ -127,6 +130,7 @@ class FiltrationNotifier extends StateNotifier<FiltrationSession> {
           ph: 7.2,
           tds: 175.0,
           turbidity: 1.1,
+          salinity: 0.22,
           temperature: 25.0,
         );
 

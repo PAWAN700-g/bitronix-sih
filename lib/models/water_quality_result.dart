@@ -48,6 +48,7 @@ class WaterQualityResult {
   final SensorStatus phStatus;
   final SensorStatus tdsStatus;
   final SensorStatus turbidityStatus;
+  final SensorStatus salinityStatus;
   final SensorStatus tempStatus;
   final bool hasAlerts;
 
@@ -57,6 +58,7 @@ class WaterQualityResult {
     required this.phStatus,
     required this.tdsStatus,
     required this.turbidityStatus,
+    required this.salinityStatus,
     required this.tempStatus,
     required this.hasAlerts,
   });
