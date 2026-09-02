@@ -1,7 +1,7 @@
 class AppConstants {
   static const String appName = 'Smart Water Monitor';
   static const String sihProjectTitle = 'Smart Water Quality Monitoring & Filtration System';
-  static const String defaultDeviceId = 'SWU-001';
+  static const String defaultDeviceId = 'ESP001';
 
   // Medical Disclaimer
   static const String medicalDisclaimer =

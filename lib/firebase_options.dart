@@ -32,6 +32,7 @@ class DefaultFirebaseOptions {
     projectId: 'bitronix-sih',
     authDomain: 'bitronix-sih.firebaseapp.com',
     storageBucket: 'bitronix-sih.firebasestorage.app',
+    databaseURL: 'https://bitronix-sih-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -40,6 +41,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '837198275681',
     projectId: 'bitronix-sih',
     storageBucket: 'bitronix-sih.firebasestorage.app',
+    databaseURL: 'https://bitronix-sih-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -49,5 +51,6 @@ class DefaultFirebaseOptions {
     projectId: 'bitronix-sih',
     storageBucket: 'bitronix-sih.firebasestorage.app',
     iosBundleId: 'com.sih.waterquality.sihSmartWater',
+    databaseURL: 'https://bitronix-sih-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
 }

@@ -4,14 +4,15 @@ import '../core/constants/app_constants.dart';
 class DeviceRepository {
   final List<DeviceModel> _devices = [
     DeviceModel(
-      id: AppConstants.defaultDeviceId,
-      name: 'Smart Water Unit #01',
+      id: 'ESP001',
+      name: 'ESP001 Smart Water Unit',
       isOnline: true,
       lastUpdated: DateTime.now(),
       phSensorActive: true,
       tdsSensorActive: true,
       turbiditySensorActive: true,
       tempSensorActive: true,
+      salinitySensorActive: true,
     ),
     DeviceModel(
       id: 'SWU-002',

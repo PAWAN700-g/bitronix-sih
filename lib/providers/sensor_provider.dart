@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../datasources/firebase_realtime_datasource.dart';
 import '../datasources/firebase_sensor_datasource.dart';
 import '../datasources/mock_sensor_datasource.dart';
 import '../models/sensor_reading.dart';
@@ -12,6 +13,10 @@ final mockSensorDataSourceProvider = Provider<MockSensorDataSource>((ref) {
   final ds = MockSensorDataSource();
   ref.onDispose(() => ds.dispose());
   return ds;
+});
+
+final firebaseRealtimeDataSourceProvider = Provider<FirebaseRealtimeDataSource>((ref) {
+  return FirebaseRealtimeDataSource();
 });
 
 final firebaseSensorDataSourceProvider = Provider<FirebaseSensorDataSource>((ref) {
@@ -28,7 +33,7 @@ final sensorRepositoryProvider = Provider<SensorRepository>((ref) {
   return SensorRepository(
     dataSource: isDemoMode
         ? ref.watch(mockSensorDataSourceProvider)
-        : ref.watch(firebaseSensorDataSourceProvider),
+        : ref.watch(firebaseRealtimeDataSourceProvider),
     qualityService: ref.watch(waterQualityServiceProvider),
   );
 });

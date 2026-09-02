@@ -5,7 +5,7 @@ final demoModeProvider = StateNotifierProvider<DemoModeNotifier, bool>((ref) {
 });
 
 class DemoModeNotifier extends StateNotifier<bool> {
-  DemoModeNotifier() : super(true); // Default DEMO MODE ON for SIH presentation
+  DemoModeNotifier() : super(false); // Default DEMO MODE OFF - Live Firebase Realtime DB mode
 
   void toggleDemoMode() {
     state = !state;
