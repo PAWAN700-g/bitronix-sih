@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../datasources/firebase_sensor_datasource.dart';
 import '../datasources/mock_sensor_datasource.dart';
 import '../models/sensor_reading.dart';
 import '../models/water_quality_result.dart';
@@ -13,27 +14,28 @@ final mockSensorDataSourceProvider = Provider<MockSensorDataSource>((ref) {
   return ds;
 });
 
+final firebaseSensorDataSourceProvider = Provider<FirebaseSensorDataSource>((ref) {
+  return FirebaseSensorDataSource();
+});
+
 final waterQualityServiceProvider = Provider<WaterQualityService>((ref) {
   return WaterQualityService();
 });
 
 final sensorRepositoryProvider = Provider<SensorRepository>((ref) {
+  final isDemoMode = ref.watch(demoModeProvider);
+
   return SensorRepository(
-    dataSource: ref.watch(mockSensorDataSourceProvider),
+    dataSource: isDemoMode
+        ? ref.watch(mockSensorDataSourceProvider)
+        : ref.watch(firebaseSensorDataSourceProvider),
     qualityService: ref.watch(waterQualityServiceProvider),
   );
 });
 
 // Real-Time Sensor Stream Provider
 final liveSensorStreamProvider = StreamProvider.family<SensorReading, String>((ref, deviceId) {
-  final isDemoMode = ref.watch(demoModeProvider);
   final repo = ref.watch(sensorRepositoryProvider);
-
-  if (!isDemoMode) {
-    // Returns last known reading when demo mode is OFF (simulate static hardware state)
-    return Stream.fromFuture(repo.getLatestReading(deviceId));
-  }
-
   return repo.getLiveSensorStream(deviceId);
 });
 

@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Devices & Sensor Readings
+    match /devices/{deviceId}/readings/{readingId} {
+      allow read: if true; // Public read for monitoring dashboard
+      allow write: if true; // Allows ESP32 / Telemetry Publisher to push readings
+    }
+
+    // Devices Metadata
+    match /devices/{deviceId} {
+      allow read, write: if true;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Feedback Collection
+    match /feedback/{feedbackId} {
+      allow create: if true;
+      allow read: if isAuthenticated();
+    }
+  }
+}

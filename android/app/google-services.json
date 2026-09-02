@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "837198275681",
+    "firebase_url": "https://bitronix-sih-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "bitronix-sih",
+    "storage_bucket": "bitronix-sih.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:837198275681:android:21cfd6351e4396ad6fb620",
+        "android_client_info": {
+          "package_name": "com.sih.waterquality.sih_smart_water"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMmkKz3RIbikcofyeRNwIDlPT0KGd_Cu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
