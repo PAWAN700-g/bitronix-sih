@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
-import 'features/navigation/screens/main_navigation_screen.dart';
+import 'features/auth/screens/auth_gate.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 
@@ -31,7 +31,7 @@ class SmartWaterApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      home: const MainNavigationScreen(),
+      home: const AuthGate(),
     );
   }
 }

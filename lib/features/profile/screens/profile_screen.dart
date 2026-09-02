@@ -6,7 +6,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../services/rate_app_service.dart';
 import '../../../services/share_service.dart';
-import '../../auth/screens/login_screen.dart';
+import '../../auth/screens/signup_screen.dart';
 import 'feedback_screen.dart';
 import 'notification_settings_screen.dart';
 
@@ -206,7 +206,7 @@ class ProfileScreen extends ConsumerWidget {
                 await ref.read(authStateProvider.notifier).logout();
                 if (context.mounted) {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    MaterialPageRoute(builder: (_) => const SignUpScreen()),
                     (route) => false,
                   );
                 }

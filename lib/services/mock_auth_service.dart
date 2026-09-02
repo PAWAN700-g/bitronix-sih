@@ -1,11 +1,7 @@
 import '../models/user_model.dart';
 
 class MockAuthService {
-  UserModel? _currentUser = const UserModel(
-    id: 'user_sih_001',
-    name: 'Pawan Kumar',
-    email: 'pawan@sih.gov.in',
-  );
+  UserModel? _currentUser;
 
   UserModel? get currentUser => _currentUser;
 

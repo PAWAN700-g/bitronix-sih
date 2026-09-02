@@ -35,8 +35,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     await ref.read(authStateProvider.notifier).login(email, password);
 
-    final authState = ref.read(authStateProvider);
     if (!mounted) return;
+    final authState = ref.read(authStateProvider);
 
     if (authState.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
