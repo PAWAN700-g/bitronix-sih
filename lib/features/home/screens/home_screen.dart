@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../providers/alert_provider.dart';
 import '../../../providers/sensor_provider.dart';
-import '../widgets/filtration_process_card.dart';
 import '../widgets/greeting_header.dart';
 import '../widgets/purity_card.dart';
 import '../widgets/sensor_grid.dart';
@@ -70,16 +69,12 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Water Safety Diagnostic & Solution Card (New Requirement)
+                  // Water Safety Diagnostic & Solution Card
                   WaterSafetyRecommendationCard(
                     reading: reading,
                     result: qualityResult,
                   ),
-                  const SizedBox(height: 20),
-
-                  // Filtration Process Card
-                  const FiltrationProcessCard(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                 ],
               ),
             );

@@ -36,6 +36,11 @@ class AlertsNotifier extends StateNotifier<List<AlertModel>> {
     ];
   }
 
+  void removeAlert(String alertId) {
+    _repository.removeAlert(alertId);
+    state = state.where((a) => a.id != alertId).toList();
+  }
+
   void clearAll() {
     _repository.clearAll();
     state = [];

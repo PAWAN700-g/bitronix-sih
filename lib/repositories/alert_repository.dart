@@ -9,7 +9,7 @@ class AlertRepository {
       deviceId: AppConstants.defaultDeviceId,
       severity: AlertSeverity.critical,
       title: 'HIGH TURBIDITY DETECTED',
-      description: 'Turbidity exceeded the configured safety threshold. Immediate filtration advised.',
+      description: 'Turbidity measured 8.4 NTU, exceeding the 5.0 NTU limit. Filtration advised.',
       sensorValue: '8.4 NTU',
       threshold: '5.0 NTU',
       timestamp: DateTime.now().subtract(const Duration(minutes: 25)),
@@ -20,7 +20,7 @@ class AlertRepository {
       deviceId: AppConstants.defaultDeviceId,
       severity: AlertSeverity.warning,
       title: 'ELEVATED TDS LEVEL',
-      description: 'Total Dissolved Solids reading is slightly elevated.',
+      description: 'TDS reading reached 480 ppm (recommended threshold: 300 ppm).',
       sensorValue: '480.0 ppm',
       threshold: '300.0 ppm',
       timestamp: DateTime.now().subtract(const Duration(hours: 2)),
@@ -31,7 +31,7 @@ class AlertRepository {
       deviceId: AppConstants.defaultDeviceId,
       severity: AlertSeverity.info,
       title: 'FILTER MAINTENANCE REMINDER',
-      description: 'System carbon filter check recommended after 50 filtration cycles.',
+      description: 'Pre-filter cartridge has completed 48 out of 50 rated filtration cycles.',
       sensorValue: '48 Cycles',
       threshold: '50 Cycles',
       timestamp: DateTime.now().subtract(const Duration(hours: 12)),
@@ -52,7 +52,7 @@ class AlertRepository {
           deviceId: reading.deviceId,
           severity: AlertSeverity.critical,
           title: 'HIGH TURBIDITY DETECTED',
-          description: 'Turbidity exceeded safety threshold. Filtration required.',
+          description: 'Turbidity reached ${reading.turbidity.toStringAsFixed(1)} NTU (acceptable limit: ${AppConstants.turbidityMaxAcceptable} NTU).',
           sensorValue: '${reading.turbidity.toStringAsFixed(1)} NTU',
           threshold: '${AppConstants.turbidityMaxAcceptable} NTU',
           timestamp: DateTime.now(),
@@ -68,7 +68,7 @@ class AlertRepository {
           deviceId: reading.deviceId,
           severity: AlertSeverity.critical,
           title: 'CRITICAL TDS LEVEL',
-          description: 'Total Dissolved Solids level is too high for direct consumption.',
+          description: 'TDS is ${reading.tds.toStringAsFixed(0)} ppm, exceeding the 500 ppm safe drinking limit.',
           sensorValue: '${reading.tds.toStringAsFixed(0)} ppm',
           threshold: '${AppConstants.tdsMaxAcceptable} ppm',
           timestamp: DateTime.now(),
@@ -81,7 +81,7 @@ class AlertRepository {
           deviceId: reading.deviceId,
           severity: AlertSeverity.warning,
           title: 'ELEVATED TDS LEVEL',
-          description: 'TDS level is above optimal recommendation.',
+          description: 'TDS is ${reading.tds.toStringAsFixed(0)} ppm, above optimal target of 300 ppm.',
           sensorValue: '${reading.tds.toStringAsFixed(0)} ppm',
           threshold: '${AppConstants.tdsMaxOptimal} ppm',
           timestamp: DateTime.now(),
@@ -97,7 +97,7 @@ class AlertRepository {
           deviceId: reading.deviceId,
           severity: AlertSeverity.critical,
           title: 'HIGH SALINITY DETECTED',
-          description: 'Water salinity is above safe Indian drinking water limits.',
+          description: 'Salinity measured ${reading.salinity.toStringAsFixed(2)} ppt (acceptable limit: ${AppConstants.salinityMaxAcceptable} ppt).',
           sensorValue: '${reading.salinity.toStringAsFixed(2)} ppt',
           threshold: '${AppConstants.salinityMaxAcceptable} ppt',
           timestamp: DateTime.now(),
@@ -110,7 +110,7 @@ class AlertRepository {
           deviceId: reading.deviceId,
           severity: AlertSeverity.warning,
           title: 'ELEVATED SALINITY LEVEL',
-          description: 'Salinity is slightly above optimal baseline.',
+          description: 'Salinity is ${reading.salinity.toStringAsFixed(2)} ppt, slightly above baseline.',
           sensorValue: '${reading.salinity.toStringAsFixed(2)} ppt',
           threshold: '${AppConstants.salinityMaxOptimal} ppt',
           timestamp: DateTime.now(),
@@ -126,7 +126,7 @@ class AlertRepository {
           deviceId: reading.deviceId,
           severity: AlertSeverity.critical,
           title: reading.ph < 6.0 ? 'LOW pH DETECTED' : 'HIGH pH DETECTED',
-          description: 'Water acidity/alkalinity is outside safe boundaries.',
+          description: 'pH level is ${reading.ph.toStringAsFixed(1)} (safe range is 6.5 – 8.5).',
           sensorValue: reading.ph.toStringAsFixed(1),
           threshold: '6.5 - 8.5',
           timestamp: DateTime.now(),
@@ -142,6 +142,10 @@ class AlertRepository {
     if (index != -1) {
       _alerts[index] = _alerts[index].copyWith(isRead: true);
     }
+  }
+
+  void removeAlert(String alertId) {
+    _alerts.removeWhere((a) => a.id == alertId);
   }
 
   void clearAll() {

@@ -24,15 +24,20 @@ class SensorChart extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (readings.isEmpty) {
-      return const SizedBox(
-        height: 200,
-        child: Center(child: Text('No historical data available')),
+      return Card(
+        elevation: 0.5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
+        ),
+        child: const SizedBox(
+          height: 220,
+          child: Center(child: Text('No historical sensor data for this range')),
+        ),
       );
     }
 
     final latestValue = extractor(readings.last);
-    final previousValue = readings.length > 1 ? extractor(readings[readings.length - 2]) : latestValue;
-    final isUp = latestValue >= previousValue;
 
     final spots = readings.asMap().entries.map((entry) {
       final idx = entry.key.toDouble();
@@ -40,31 +45,39 @@ class SensorChart extends StatelessWidget {
       return FlSpot(idx, val);
     }).toList();
 
-    double minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
-    double maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    final actualMin = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+    final actualMax = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    final avg = spots.map((s) => s.y).reduce((a, b) => a + b) / spots.length;
 
-    // Padding for Y axis boundaries
-    final padding = (maxY - minY) * 0.2;
-    minY = (minY - (padding == 0 ? 1 : padding)).clamp(0, 1000);
-    maxY = maxY + (padding == 0 ? 1 : padding);
+    // Bounds for chart display
+    final range = actualMax - actualMin;
+    final padding = range == 0 ? (actualMax == 0 ? 1.0 : actualMax * 0.1) : range * 0.2;
+    final displayMin = (actualMin - padding).clamp(0.0, 10000.0);
+    final displayMax = actualMax + padding;
 
     return Card(
+      elevation: 0.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Top Row: Title, Current Value, and Stats Strip
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title.toUpperCase(),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.1,
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -74,52 +87,70 @@ class SensorChart extends StatelessWidget {
                       children: [
                         Text(
                           latestValue.toStringAsFixed(1),
-                          style: theme.textTheme.headlineMedium?.copyWith(
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: lineColors,
                           ),
                         ),
                         if (unit.isNotEmpty) ...[
                           const SizedBox(width: 4),
-                          Text(unit, style: theme.textTheme.bodyMedium),
+                          Text(
+                            unit,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ],
                       ],
                     ),
                   ],
                 ),
 
-                Row(
-                  children: [
-                    Icon(
-                      isUp ? Icons.trending_up : Icons.trending_down,
-                      color: isUp ? lineColors : Colors.grey,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      isUp ? 'Trending Up' : 'Trending Down',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isUp ? lineColors : Colors.grey,
+                // Statistics Summary (Min / Avg / Max)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Min: ${actualMin.toStringAsFixed(1)} | Max: ${actualMax.toStringAsFixed(1)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        'Avg: ${avg.toStringAsFixed(1)} $unit',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: lineColors,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
+            // Line Chart
             SizedBox(
-              height: 180,
+              height: 190,
               child: LineChart(
                 LineChartData(
-                  minY: minY,
-                  maxY: maxY,
+                  minY: displayMin,
+                  maxY: displayMax,
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: false,
-                    horizontalInterval: ((maxY - minY) / 3).clamp(0.1, 1000),
+                    horizontalInterval: ((displayMax - displayMin) / 3).clamp(0.1, 1000),
                     getDrawingHorizontalLine: (value) => FlLine(
                       color: theme.dividerColor.withValues(alpha: 0.2),
                       strokeWidth: 1,
@@ -132,10 +163,10 @@ class SensorChart extends StatelessWidget {
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 40,
+                        reservedSize: 38,
                         getTitlesWidget: (val, meta) {
                           return Text(
-                            val.toStringAsFixed(1),
+                            val.toStringAsFixed(val >= 100 ? 0 : 1),
                             style: TextStyle(
                               fontSize: 10,
                               color: theme.colorScheme.onSurfaceVariant,
@@ -147,7 +178,7 @@ class SensorChart extends StatelessWidget {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 24,
+                        reservedSize: 22,
                         interval: (readings.length / 4).clamp(1, 100).toDouble(),
                         getTitlesWidget: (val, meta) {
                           final idx = val.toInt();
@@ -172,12 +203,12 @@ class SensorChart extends StatelessWidget {
                       spots: spots,
                       isCurved: true,
                       color: lineColors,
-                      barWidth: 3,
+                      barWidth: 2.5,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: lineColors.withValues(alpha: 0.15),
+                        color: lineColors.withValues(alpha: 0.12),
                       ),
                     ),
                   ],

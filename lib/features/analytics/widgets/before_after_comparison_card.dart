@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../models/water_quality_result.dart';
 import '../../../providers/filtration_provider.dart';
 
 class BeforeAfterComparisonCard extends ConsumerWidget {
@@ -17,61 +16,61 @@ class BeforeAfterComparisonCard extends ConsumerWidget {
     final after = session.afterReading;
     final improvement = session.improvementPercentage;
 
-    final beforeResult = session.beforeResult;
-    final afterResult = session.afterResult;
+    final beforeScore = session.beforeResult.overallScore;
+    final afterScore = session.afterResult?.overallScore ?? beforeScore;
 
     return Card(
+      elevation: 0.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: theme.dividerColor.withValues(alpha: 0.2),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Header with Overflow Protection
+            // Title & Performance Tag
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'BEFORE VS AFTER FILTRATION',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.1,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Filtration Performance',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Indian BIS IS 10500:2012 Safety Benchmark',
-                        style: theme.textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Inflow vs Treated Output (BIS IS 10500)',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-
-                // Improvement % Chip
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.excellent.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.excellent, width: 1),
+                    color: AppColors.excellent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.trending_up, size: 14, color: AppColors.excellent),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_upward_rounded, size: 13, color: AppColors.excellent),
+                      const SizedBox(width: 3),
                       Text(
-                        '+${improvement.toStringAsFixed(1)}%',
+                        '+${improvement.toStringAsFixed(0)}% Purity',
                         style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.excellent,
                         ),
                       ),
@@ -80,120 +79,104 @@ class BeforeAfterComparisonCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // Purity Score Comparison Bar
-            Row(
-              children: [
-                Expanded(
-                  child: _buildScorePill(
-                    context,
-                    label: 'PURITY BEFORE',
-                    score: beforeResult.overallScore,
-                    grade: beforeResult.grade.label,
-                    color: AppColors.poor,
+            // Inflow vs Outflow Score Pill
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'RAW INFLOW',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$beforeScore / 100',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.poor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 20),
-                ),
-                Expanded(
-                  child: _buildScorePill(
-                    context,
-                    label: 'PURITY AFTER',
-                    score: afterResult?.overallScore ?? beforeResult.overallScore,
-                    grade: afterResult?.grade.label ?? 'Processing',
-                    color: AppColors.excellent,
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 18,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            const Divider(),
-            const SizedBox(height: 8),
-
-            // Table Legend
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _buildLegendTag(context, 'SAFE 🟢', AppColors.excellent),
-                const SizedBox(width: 8),
-                _buildLegendTag(context, 'WARNING 🟡', AppColors.moderate),
-                const SizedBox(width: 8),
-                _buildLegendTag(context, 'RISKY 🔴', AppColors.poor),
-              ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'TREATED OUTPUT',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$afterScore / 100',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.excellent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
 
-            // Comparison Table with Indian Standard Column
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 480),
-                child: Column(
-                  children: [
-                    _buildTableHeader(context),
-                    const Divider(height: 12),
-
-                    // 1. pH Level
-                    _buildTableRow(
-                      context,
-                      parameter: 'pH Level',
-                      beforeVal: before.ph.toStringAsFixed(1),
-                      beforeStatus: beforeResult.phStatus,
-                      afterVal: after != null ? after.ph.toStringAsFixed(1) : '--',
-                      afterStatus: afterResult?.phStatus ?? SensorStatus.normal,
-                      safeLimit: AppConstants.bisPhStandard,
-                    ),
-
-                    // 2. TDS Level
-                    _buildTableRow(
-                      context,
-                      parameter: 'TDS (ppm)',
-                      beforeVal: '${before.tds.toStringAsFixed(0)}',
-                      beforeStatus: beforeResult.tdsStatus,
-                      afterVal: after != null ? '${after.tds.toStringAsFixed(0)}' : '--',
-                      afterStatus: afterResult?.tdsStatus ?? SensorStatus.good,
-                      safeLimit: AppConstants.bisTdsStandard,
-                    ),
-
-                    // 3. Turbidity
-                    _buildTableRow(
-                      context,
-                      parameter: 'Turbidity (NTU)',
-                      beforeVal: before.turbidity.toStringAsFixed(1),
-                      beforeStatus: beforeResult.turbidityStatus,
-                      afterVal: after != null ? after.turbidity.toStringAsFixed(1) : '--',
-                      afterStatus: afterResult?.turbidityStatus ?? SensorStatus.normal,
-                      safeLimit: AppConstants.bisTurbidityStandard,
-                    ),
-
-                    // 4. Salinity
-                    _buildTableRow(
-                      context,
-                      parameter: 'Salinity (ppt)',
-                      beforeVal: before.salinity.toStringAsFixed(2),
-                      beforeStatus: beforeResult.salinityStatus,
-                      afterVal: after != null ? after.salinity.toStringAsFixed(2) : '--',
-                      afterStatus: afterResult?.salinityStatus ?? SensorStatus.normal,
-                      safeLimit: AppConstants.bisSalinityStandard,
-                    ),
-
-                    // 5. Temperature
-                    _buildTableRow(
-                      context,
-                      parameter: 'Temp (°C)',
-                      beforeVal: before.temperature.toStringAsFixed(1),
-                      beforeStatus: beforeResult.tempStatus,
-                      afterVal: after != null ? after.temperature.toStringAsFixed(1) : '--',
-                      afterStatus: afterResult?.tempStatus ?? SensorStatus.normal,
-                      safeLimit: AppConstants.bisTempStandard,
-                    ),
-                  ],
-                ),
-              ),
+            // Comparison Breakdown
+            _buildParameterRow(
+              context,
+              name: 'TDS',
+              unit: 'ppm',
+              beforeVal: before.tds.toStringAsFixed(0),
+              afterVal: after != null ? after.tds.toStringAsFixed(0) : '--',
+              safeTarget: AppConstants.bisTdsStandard,
+              improved: after != null ? after.tds <= before.tds : true,
+            ),
+            const Divider(height: 10),
+            _buildParameterRow(
+              context,
+              name: 'Turbidity',
+              unit: 'NTU',
+              beforeVal: before.turbidity.toStringAsFixed(1),
+              afterVal: after != null ? after.turbidity.toStringAsFixed(1) : '--',
+              safeTarget: AppConstants.bisTurbidityStandard,
+              improved: after != null ? after.turbidity <= before.turbidity : true,
+            ),
+            const Divider(height: 10),
+            _buildParameterRow(
+              context,
+              name: 'pH Level',
+              unit: '',
+              beforeVal: before.ph.toStringAsFixed(1),
+              afterVal: after != null ? after.ph.toStringAsFixed(1) : '--',
+              safeTarget: AppConstants.bisPhStandard,
+              improved: true,
             ),
           ],
         ),
@@ -201,158 +184,68 @@ class BeforeAfterComparisonCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildScorePill(
+  Widget _buildParameterRow(
     BuildContext context, {
-    required String label,
-    required int score,
-    required String grade,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '$score / 100',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color),
-          ),
-          Text(
-            grade,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendTag(BuildContext context, String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: color),
-      ),
-    );
-  }
-
-  Widget _buildTableHeader(BuildContext context) {
-    const headerStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey);
-    return const Row(
-      children: [
-        SizedBox(width: 110, child: Text('PARAMETER', style: headerStyle)),
-        SizedBox(width: 90, child: Text('BEFORE', style: headerStyle)),
-        SizedBox(width: 90, child: Text('AFTER', style: headerStyle)),
-        SizedBox(width: 140, child: Text('SAFE LIMIT (BIS IS 10500)', style: headerStyle)),
-      ],
-    );
-  }
-
-  Widget _buildTableRow(
-    BuildContext context, {
-    required String parameter,
+    required String name,
+    required String unit,
     required String beforeVal,
-    required SensorStatus beforeStatus,
     required String afterVal,
-    required SensorStatus afterStatus,
-    required String safeLimit,
+    required String safeTarget,
+    required bool improved,
   }) {
+    final theme = Theme.of(context);
+    final unitSuffix = unit.isNotEmpty ? ' $unit' : '';
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
           SizedBox(
-            width: 110,
+            width: 80,
             child: Text(
-              parameter,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            ),
-          ),
-
-          // BEFORE Value + Status Badge
-          SizedBox(
-            width: 90,
-            child: _buildValuePill(beforeVal, beforeStatus),
-          ),
-
-          // AFTER Value + Status Badge
-          SizedBox(
-            width: 90,
-            child: _buildValuePill(afterVal, afterStatus),
-          ),
-
-          // INDIAN STANDARD GENERAL SAFE LIMIT
-          SizedBox(
-            width: 140,
-            child: Text(
-              safeLimit,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+              name,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildValuePill(String val, SensorStatus status) {
-    Color bg;
-    Color fg;
-    String prefix;
-
-    switch (status) {
-      case SensorStatus.critical:
-        bg = AppColors.poor.withOpacity(0.15);
-        fg = AppColors.poor;
-        prefix = '🔴 ';
-        break;
-      case SensorStatus.warning:
-        bg = AppColors.moderate.withOpacity(0.15);
-        fg = AppColors.moderate;
-        prefix = '🟡 ';
-        break;
-      case SensorStatus.good:
-      case SensorStatus.normal:
-        bg = AppColors.excellent.withOpacity(0.15);
-        fg = AppColors.excellent;
-        prefix = '🟢 ';
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: Text(
-          '$prefix$val',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: fg,
+          Expanded(
+            child: Row(
+              children: [
+                Text(
+                  '$beforeVal$unitSuffix',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                  child: Icon(
+                    Icons.east_rounded,
+                    size: 12,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+                Text(
+                  '$afterVal$unitSuffix',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: improved ? AppColors.excellent : theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          Text(
+            'Target: $safeTarget',
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+

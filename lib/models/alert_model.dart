@@ -8,11 +8,11 @@ extension AlertSeverityX on AlertSeverity {
   String get label {
     switch (this) {
       case AlertSeverity.critical:
-        return 'CRITICAL';
+        return 'Critical';
       case AlertSeverity.warning:
-        return 'WARNING';
+        return 'Warning';
       case AlertSeverity.info:
-        return 'INFO';
+        return 'Info';
     }
   }
 }

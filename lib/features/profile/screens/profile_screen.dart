@@ -141,14 +141,10 @@ class ProfileScreen extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.star_outline),
               title: const Text('Rate App'),
+              subtitle: const Text('Rate us out of 5 stars', style: TextStyle(fontSize: 11)),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () async {
-                await RateAppService().requestReview();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Thank you for rating Smart Water Monitor!')),
-                  );
-                }
+              onTap: () {
+                _showRateAppDialog(context);
               },
             ),
 
@@ -222,6 +218,136 @@ class ProfileScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showRateAppDialog(BuildContext context) {
+    int selectedStars = 5;
+    final feedbackController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            String getRatingLabel(int stars) {
+              switch (stars) {
+                case 1:
+                  return 'Poor';
+                case 2:
+                  return 'Could be better';
+                case 3:
+                  return 'Good';
+                case 4:
+                  return 'Very Good!';
+                case 5:
+                  return 'Excellent! ⭐';
+                default:
+                  return '';
+              }
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.star_rounded, color: Colors.amber, size: 36),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Rate Your Experience',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'How would you rate Smart Water Monitor?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starIndex = index + 1;
+                      return IconButton(
+                        iconSize: 34,
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        onPressed: () {
+                          setState(() {
+                            selectedStars = starIndex;
+                          });
+                        },
+                        icon: Icon(
+                          starIndex <= selectedStars ? Icons.star_rounded : Icons.star_outline_rounded,
+                          color: Colors.amber,
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    getRatingLabel(selectedStars),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amber,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: feedbackController,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: 'Any comments or feedback? (Optional)',
+                      hintStyle: const TextStyle(fontSize: 12),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.all(10),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Maybe Later'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Thank you for your $selectedStars-star rating!'),
+                        backgroundColor: AppColors.excellent,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

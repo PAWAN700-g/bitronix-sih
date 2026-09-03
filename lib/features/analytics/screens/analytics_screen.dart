@@ -25,50 +25,52 @@ class AnalyticsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Time Filter Segment Buttons
+              // Time Filter Controls (Today / 7 Days)
               Row(
                 children: [
-                  _buildFilterChip(context, ref, label: 'Today', days: 1, currentDays: selectedDays),
+                  _buildTimeFilterChip(context, ref, label: 'Today', days: 1, currentDays: selectedDays),
                   const SizedBox(width: 8),
-                  _buildFilterChip(context, ref, label: '7 Days', days: 7, currentDays: selectedDays),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(context, ref, label: '30 Days', days: 30, currentDays: selectedDays),
+                  _buildTimeFilterChip(context, ref, label: '7 Days', days: 7, currentDays: selectedDays),
                 ],
               ),
+              const SizedBox(height: 16),
+
+              // Filtration Performance (Inflow vs Outflow)
+              const BeforeAfterComparisonCard(),
               const SizedBox(height: 20),
 
-              // Major Feature: Before vs After Filtration Comparison Card
-              const BeforeAfterComparisonCard(),
-              const SizedBox(height: 24),
-
+              // Section Header
               Text(
-                'HISTORICAL PARAMETER TRENDS',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
+                'Sensor Telemetry Trends',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 4),
+              Text(
+                'Continuous 4-parameter historical monitoring',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 14),
 
               historyAsync.when(
                 data: (readings) {
-                  final qualityService = ref.watch(waterQualityServiceProvider);
+                  if (readings.isEmpty) {
+                    return const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Center(child: Text('No readings recorded for this duration')),
+                      ),
+                    );
+                  }
 
                   return Column(
                     children: [
-                      // 1. Overall Purity Chart
+                      // 1. pH Sensor Graph
                       SensorChart(
-                        title: 'Overall Purity Score',
-                        unit: '/ 100',
-                        readings: readings,
-                        extractor: (r) => qualityService.evaluate(r).overallScore.toDouble(),
-                        lineColors: AppColors.primary,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 2. pH Chart
-                      SensorChart(
-                        title: 'pH Trend',
+                        title: 'pH Level',
                         unit: '',
                         readings: readings,
                         extractor: (r) => r.ph,
@@ -76,9 +78,9 @@ class AnalyticsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      // 3. TDS Chart
+                      // 2. TDS Sensor Graph
                       SensorChart(
-                        title: 'TDS Trend',
+                        title: 'Total Dissolved Solids (TDS)',
                         unit: 'ppm',
                         readings: readings,
                         extractor: (r) => r.tds,
@@ -86,9 +88,9 @@ class AnalyticsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      // 4. Turbidity Chart
+                      // 3. Turbidity Sensor Graph
                       SensorChart(
-                        title: 'Turbidity Trend',
+                        title: 'Turbidity',
                         unit: 'NTU',
                         readings: readings,
                         extractor: (r) => r.turbidity,
@@ -96,19 +98,9 @@ class AnalyticsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      // 5. Salinity Chart
+                      // 4. Temperature Sensor Graph
                       SensorChart(
-                        title: 'Salinity Trend',
-                        unit: 'ppt',
-                        readings: readings,
-                        extractor: (r) => r.salinity,
-                        lineColors: AppColors.salinityColor,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 6. Temperature Chart
-                      SensorChart(
-                        title: 'Temperature Trend',
+                        title: 'Water Temperature',
                         unit: '°C',
                         readings: readings,
                         extractor: (r) => r.temperature,
@@ -125,7 +117,10 @@ class AnalyticsScreen extends ConsumerWidget {
                   ),
                 ),
                 error: (err, st) => Center(
-                  child: Text('Error loading historical analytics: $err'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Text('Error loading historical data: $err'),
+                  ),
                 ),
               ),
             ],
@@ -135,7 +130,7 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilterChip(
+  Widget _buildTimeFilterChip(
     BuildContext context,
     WidgetRef ref, {
     required String label,
@@ -143,14 +138,16 @@ class AnalyticsScreen extends ConsumerWidget {
     required int currentDays,
   }) {
     final isSelected = days == currentDays;
+    final theme = Theme.of(context);
 
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      selectedColor: AppColors.primary,
+      selectedColor: theme.colorScheme.primaryContainer,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 12,
+        color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
       onSelected: (selected) {
         if (selected) {
@@ -160,3 +157,4 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 }
+
