@@ -4,7 +4,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/sensor_reading.dart';
-import 'mock_sensor_datasource.dart';
 import 'sensor_datasource.dart';
 
 /// Firebase Realtime Database Data Source
@@ -24,8 +23,6 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
 
     controller = StreamController<SensorReading>(
       onListen: () {
-        bool nativeFailed = false;
-
         try {
           final ref = _database.ref('devices/$deviceId');
           nativeSub = ref.onValue.listen(
@@ -33,7 +30,6 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
               if (controller.isClosed) return;
               final snapshot = event.snapshot;
               if (!snapshot.exists || snapshot.value == null) {
-                // If native is empty, fetch via REST
                 _fetchRestReading(deviceId).then((reading) {
                   if (!controller.isClosed) controller.add(reading);
                 }).catchError((err) {
@@ -58,7 +54,6 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
             },
             onError: (err) {
               debugPrint('Native RTDB Stream error ($err). Activating HTTP REST Fallback...');
-              nativeFailed = true;
               nativeSub?.cancel();
               nativeSub = null;
               _startHttpFallback(deviceId, controller, pollTimer);
@@ -66,7 +61,6 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
           );
         } catch (e) {
           debugPrint('Native RTDB Init exception ($e). Activating HTTP REST Fallback...');
-          nativeFailed = true;
           _startHttpFallback(deviceId, controller, pollTimer);
         }
       },
@@ -84,14 +78,12 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
     StreamController<SensorReading> controller,
     Timer? pollTimer,
   ) {
-    // Initial fetch
     _fetchRestReading(deviceId).then((reading) {
       if (!controller.isClosed) controller.add(reading);
     }).catchError((err) {
       if (!controller.isClosed) controller.addError(err);
     });
 
-    // Poll every 3 seconds
     pollTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
       if (controller.isClosed) return;
       try {
@@ -108,7 +100,6 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
     final response = await http.get(url);
 
     if (response.statusCode != 200 || response.body == 'null' || response.body.isEmpty) {
-      // Fallback empty sensor reading if database path is not created yet
       return SensorReading(
         deviceId: deviceId,
         timestamp: DateTime.now(),
@@ -176,17 +167,11 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
           }
         });
         readings.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-        if (readings.isNotEmpty) {
-          return readings;
-        }
+        return readings;
       }
     } catch (_) {}
 
-    // Fallback: If Firebase history node is empty/offline, provide realistic historical points so graphs always render smoothly!
-    final mockDs = MockSensorDataSource();
-    final fallbackList = await mockDs.fetchHistoricalReadings(deviceId, days: days);
-    mockDs.dispose();
-    return fallbackList;
+    return [];
   }
 
   SensorReading _parseRealtimeMap(String deviceId, Map<String, dynamic> data) {

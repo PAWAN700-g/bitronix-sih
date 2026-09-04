@@ -1,5 +1,4 @@
 import '../models/device_model.dart';
-import '../core/constants/app_constants.dart';
 
 class DeviceRepository {
   final List<DeviceModel> _devices = [

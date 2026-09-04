@@ -45,9 +45,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           backgroundColor: AppColors.poor,
         ),
       );
-    } else if (authState.hasValue && authState.value != null) {
-      Navigator.of(context).pushReplacement(
+    } else if (authState.value != null) {
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        (route) => false,
       );
     }
   }
