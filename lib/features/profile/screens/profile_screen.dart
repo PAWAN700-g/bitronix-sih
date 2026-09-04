@@ -4,7 +4,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/theme_provider.dart';
-import '../../../services/rate_app_service.dart';
 import '../../../services/share_service.dart';
 import '../../auth/screens/signup_screen.dart';
 import 'feedback_screen.dart';

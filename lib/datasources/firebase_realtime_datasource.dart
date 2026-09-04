@@ -56,12 +56,12 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
               debugPrint('Native RTDB Stream error ($err). Activating HTTP REST Fallback...');
               nativeSub?.cancel();
               nativeSub = null;
-              _startHttpFallback(deviceId, controller, pollTimer);
+              pollTimer = _startHttpFallback(deviceId, controller);
             },
           );
         } catch (e) {
           debugPrint('Native RTDB Init exception ($e). Activating HTTP REST Fallback...');
-          _startHttpFallback(deviceId, controller, pollTimer);
+          pollTimer = _startHttpFallback(deviceId, controller);
         }
       },
       onCancel: () {
@@ -73,10 +73,9 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
     return controller.stream;
   }
 
-  void _startHttpFallback(
+  Timer _startHttpFallback(
     String deviceId,
     StreamController<SensorReading> controller,
-    Timer? pollTimer,
   ) {
     _fetchRestReading(deviceId).then((reading) {
       if (!controller.isClosed) controller.add(reading);
@@ -84,7 +83,7 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
       if (!controller.isClosed) controller.addError(err);
     });
 
-    pollTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+    return Timer.periodic(const Duration(seconds: 3), (_) async {
       if (controller.isClosed) return;
       try {
         final reading = await _fetchRestReading(deviceId);

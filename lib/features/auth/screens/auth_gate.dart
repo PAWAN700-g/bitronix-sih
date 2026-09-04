@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sih_smart_water/features/auth/screens/login_screen.dart';
 import '../../../providers/auth_provider.dart';
 import '../../navigation/screens/main_navigation_screen.dart';
 import 'signup_screen.dart';

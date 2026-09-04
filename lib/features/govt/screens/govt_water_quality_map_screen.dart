@@ -36,9 +36,9 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
             const SizedBox(width: 10),
             const Expanded(
               child: Text(
-                'GOVT WATER AUTHORITY PORTAL',
+                'JHARKHAND WATER AUTHORITY PORTAL',
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
           ],
@@ -53,7 +53,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
               border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             child: const Text(
-              'JAL SHAKTI / SIH INSPECTOR',
+              'JHARKHAND GOVT / SIH',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
             ),
           ),
@@ -67,7 +67,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
               padding: const EdgeInsets.all(12.0),
               child: Row(
                 children: [
-                  _buildStatTile('Total Stations', '${stations.length}', Icons.sensors_outlined, theme.colorScheme.primary),
+                  _buildStatTile('Jharkhand Hubs', '${stations.length}', Icons.sensors_outlined, theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   _buildStatTile('Verified 🟢', '$verifiedCount', Icons.verified_rounded, AppColors.excellent),
                   const SizedBox(width: 8),
@@ -76,7 +76,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
               ),
             ),
 
-            // Spatial GIS Map View Container
+            // Spatial GIS Map View Container (Jharkhand State Focus)
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -87,13 +87,14 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                 ),
                 child: Stack(
                   children: [
-                    // Grid / Topo Map Background Pattern
+                    // Jharkhand State Boundary & Topo Grid Painter
                     Positioned.fill(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: CustomPaint(
-                          painter: MapGridPainter(
-                            gridColor: theme.dividerColor.withValues(alpha: 0.15),
+                          painter: JharkhandStateMapPainter(
+                            gridColor: theme.dividerColor.withValues(alpha: 0.12),
+                            boundaryColor: AppColors.primary.withValues(alpha: 0.35),
                           ),
                         ),
                       ),
@@ -106,7 +107,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                          color: theme.colorScheme.surface.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
@@ -117,7 +118,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                             Icon(Icons.map_rounded, size: 14, color: AppColors.primary),
                             SizedBox(width: 6),
                             Text(
-                              'National GIS Water Quality Monitoring Map',
+                              'Jharkhand GIS Water Quality Inspection Map',
                               style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -125,14 +126,15 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                       ),
                     ),
 
-                    // Simulated India Map Coordinates Pin Overlay
+                    // Jharkhand Regional Coordinates Pin Overlay
                     ...stations.asMap().entries.map((entry) {
                       final idx = entry.key;
                       final station = entry.value;
 
-                      // Map layout positioning coordinates
-                      final topOffsets = [100.0, 180.0, 310.0, 210.0, 360.0];
-                      final leftOffsets = [120.0, 220.0, 60.0, 210.0, 140.0];
+                      // Spatial positions corresponding to Jharkhand geography layout
+                      // (Palamu North-West, Hazaribagh North, Deoghar North-East, Ranchi Center, Dhanbad/Bokaro East, Jamshedpur South-East)
+                      final topOffsets = [190.0, 310.0, 160.0, 195.0, 110.0, 90.0, 75.0];
+                      final leftOffsets = [135.0, 240.0, 230.0, 195.0, 155.0, 260.0, 50.0];
 
                       final top = topOffsets[idx % topOffsets.length];
                       final left = leftOffsets[idx % leftOffsets.length];
@@ -184,7 +186,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                                   border: Border.all(color: pinColor.withValues(alpha: 0.5)),
                                 ),
                                 child: Text(
-                                  station.stationName.split(' ').first,
+                                  '${station.district} (${station.purityScore.round()})',
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
@@ -196,7 +198,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
 
                     if (_selectedStation == null)
                       Positioned(
@@ -216,7 +218,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                               SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'Tap any map station pin above to inspect regional water metrics & verify Jal Shakti compliance.',
+                                  'Tap any Jharkhand station pin above to inspect district water metrics & verify Jal Shakti compliance.',
                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                                 ),
                               ),
@@ -310,7 +312,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                     Text(
-                      '${station.district}, ${station.state} • Lat: ${station.latitude}, Long: ${station.longitude}',
+                      'District: ${station.district}, ${station.state} • Lat: ${station.latitude}, Long: ${station.longitude}',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
@@ -373,11 +375,11 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                   : () {
                       ref.read(govtStationsProvider.notifier).verifyStation(
                             station.id,
-                            'Verified by Official Govt Inspector. Compliant with BIS IS 10500 standards.',
+                            'Verified by Jharkhand Water Resources Dept. Compliant with BIS IS 10500 standards.',
                           );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Jal Shakti Official Certificate issued for ${station.stationName}!'),
+                          content: Text('Jharkhand Govt Approval Certificate issued for ${station.stationName}!'),
                           backgroundColor: AppColors.excellent,
                         ),
                       );
@@ -391,7 +393,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
               ),
               label: Text(
                 station.isVerifiedByGovt
-                    ? 'VERIFIED & CERTIFIED BY GOVT AUTHORITY 🟢'
+                    ? 'VERIFIED & CERTIFIED BY JHARKHAND GOVT 🟢'
                     : 'Verify Station & Issue Official Certificate',
               ),
               style: ElevatedButton.styleFrom(
@@ -424,24 +426,53 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
   }
 }
 
-class MapGridPainter extends CustomPainter {
+class JharkhandStateMapPainter extends CustomPainter {
   final Color gridColor;
+  final Color boundaryColor;
 
-  MapGridPainter({required this.gridColor});
+  JharkhandStateMapPainter({required this.gridColor, required this.boundaryColor});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    final gridPaint = Paint()
       ..color = gridColor
       ..strokeWidth = 1.0;
 
-    const step = 40.0;
+    const step = 35.0;
     for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
     }
     for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
+
+    // Jharkhand State Stylized Geographic Boundary Path
+    final boundaryPaint = Paint()
+      ..color = boundaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2;
+
+    final fillPaint = Paint()
+      ..color = boundaryColor.withValues(alpha: 0.05)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    final w = size.width;
+    final h = size.height;
+
+    // Geographic shape polygon representation for Jharkhand
+    path.moveTo(w * 0.15, h * 0.20); // North-West (Palamu / Garhwa)
+    path.lineTo(w * 0.50, h * 0.15); // North (Hazaribagh / Kodarma)
+    path.lineTo(w * 0.85, h * 0.20); // North-East (Deoghar / Sahibganj)
+    path.lineTo(w * 0.92, h * 0.50); // East (Dhanbad / Bokaro)
+    path.lineTo(w * 0.80, h * 0.82); // South-East (East Singhbhum / Jamshedpur)
+    path.lineTo(w * 0.45, h * 0.88); // South (West Singhbhum)
+    path.lineTo(w * 0.18, h * 0.70); // South-West (Simdega / Gumla)
+    path.lineTo(w * 0.10, h * 0.45); // West (Latehar)
+    path.close();
+
+    canvas.drawPath(path, fillPaint);
+    canvas.drawPath(path, boundaryPaint);
   }
 
   @override
