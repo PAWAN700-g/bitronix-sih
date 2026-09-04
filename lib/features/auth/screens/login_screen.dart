@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/user_model.dart';
 import '../../../providers/auth_provider.dart';
 import '../../navigation/screens/main_navigation_screen.dart';
 import 'forgot_password_screen.dart';
@@ -18,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(text: 'pawan@sih.gov.in');
   final _passwordController = TextEditingController(text: 'password123');
+  UserRole _selectedRole = UserRole.consumer;
   bool _obscurePassword = true;
 
   @override
@@ -70,41 +72,102 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // App Icon / Logo
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.water_drop_rounded,
-                      size: 48,
-                      color: AppColors.primary,
-                    ),
+                  const Icon(
+                    Icons.water_drop_rounded,
+                    size: 64,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     AppConstants.appName,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
-                    'Smart Water Quality Monitoring & Filtration',
+                    AppConstants.sihProjectTitle,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 24),
+
+                  // Account Role Selector (Consumer vs Govt Authority)
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedRole = UserRole.consumer),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _selectedRole == UserRole.consumer
+                                    ? AppColors.primary
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'Household Consumer',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedRole == UserRole.consumer
+                                      ? Colors.white
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedRole = UserRole.govtAuthority),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _selectedRole == UserRole.govtAuthority
+                                    ? AppColors.primary
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'Govt Authority 🏛️',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedRole == UserRole.govtAuthority
+                                      ? Colors.white
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
                   // Email Field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: _selectedRole == UserRole.govtAuthority
+                          ? 'Official Inspector Email (.gov.in)'
+                          : 'Email Address',
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (val) {
                       if (val == null || val.trim().isEmpty) {
@@ -144,7 +207,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                   ),
 
-                  // Forgot Password Link
+                  // Forgot Password Button
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -158,7 +221,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: const Text('Forgot Password?'),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Login Button
                   ElevatedButton(
@@ -172,7 +235,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Login'),
+                        : Text(_selectedRole == UserRole.govtAuthority
+                            ? 'Govt Official Login 🏛️'
+                            : 'Login'),
                   ),
                   const SizedBox(height: 24),
 

@@ -14,7 +14,7 @@ void main() {
 
     // Verify AuthGate renders SignUpScreen on initial launch for new/unauthenticated users
     expect(find.text('Create Account'), findsOneWidget);
-    expect(find.text('Join Smart Water System'), findsOneWidget);
-    expect(find.text('Sign Up'), findsWidgets);
+    expect(find.text('Join Smart Water Quality & Inspection System'), findsOneWidget);
+    expect(find.text('Household Consumer'), findsOneWidget);
   });
 }

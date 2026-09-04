@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alerts/screens/alerts_screen.dart';
 import '../../analytics/screens/analytics_screen.dart';
 import '../../devices/screens/devices_screen.dart';
+import '../../govt/screens/govt_water_quality_map_screen.dart';
 import '../../home/screens/home_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 
@@ -17,6 +18,7 @@ class MainNavigationScreen extends ConsumerWidget {
 
     final List<Widget> screens = const [
       HomeScreen(),
+      GovtWaterQualityMapScreen(),
       AnalyticsScreen(),
       AlertsScreen(),
       DevicesScreen(),
@@ -39,6 +41,11 @@ class MainNavigationScreen extends ConsumerWidget {
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map_outlined),
+            activeIcon: Icon(Icons.map_rounded),
+            label: 'Govt Map 🏛️',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_outlined),
