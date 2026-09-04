@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/auth_gate.dart';
 import 'firebase_options.dart';
-import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,19 +17,16 @@ void main() async {
   runApp(const ProviderScope(child: SmartWaterApp()));
 }
 
-class SmartWaterApp extends ConsumerWidget {
+class SmartWaterApp extends StatelessWidget {
   const SmartWaterApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Smart Water Monitor',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      themeMode: ThemeMode.light,
       home: const AuthGate(),
     );
   }

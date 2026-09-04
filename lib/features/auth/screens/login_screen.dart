@@ -34,8 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-
-    await ref.read(authStateProvider.notifier).login(email, password);
+    await ref.read(authStateProvider.notifier).login(email, password, role: _selectedRole);
 
     if (!mounted) return;
     final authState = ref.read(authStateProvider);

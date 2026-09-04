@@ -44,20 +44,20 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     });
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String email, String password, {UserRole role = UserRole.consumer}) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _repository.login(email: email, password: password);
+      final user = await _repository.login(email: email, password: password, role: role);
       state = AsyncValue.data(user);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 
-  Future<void> signUp(String name, String email, String password) async {
+  Future<void> signUp(String name, String email, String password, {UserRole role = UserRole.consumer}) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _repository.signUp(name: name, email: email, password: password);
+      final user = await _repository.signUp(name: name, email: email, password: password, role: role);
       state = AsyncValue.data(user);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

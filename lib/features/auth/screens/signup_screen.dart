@@ -39,8 +39,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-
-    await ref.read(authStateProvider.notifier).signUp(name, email, password);
+    await ref.read(authStateProvider.notifier).signUp(name, email, password, role: _selectedRole);
 
     if (!mounted) return;
     final authState = ref.read(authStateProvider);

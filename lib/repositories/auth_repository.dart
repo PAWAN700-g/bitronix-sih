@@ -41,13 +41,17 @@ class AuthRepository {
 
   Stream<UserModel?> get authStateChanges => _authController.stream;
 
-  Future<UserModel> login({required String email, required String password}) async {
+  Future<UserModel> login({
+    required String email,
+    required String password,
+    UserRole role = UserRole.consumer,
+  }) async {
     final fbService = _firebaseAuthService;
     final mockService = _mockAuthService;
 
     if (fbService != null) {
       try {
-        final user = await fbService.login(email: email, password: password);
+        final user = await fbService.login(email: email, password: password, role: role);
         _fallbackUser = user;
         _authController.add(user);
         return user;
@@ -58,6 +62,7 @@ class AuthRepository {
             name: email.split('@').first,
             email: email,
             password: password,
+            role: role,
           );
           _fallbackUser = user;
           _authController.add(user);
@@ -69,7 +74,7 @@ class AuthRepository {
     }
 
     if (mockService != null) {
-      final user = await mockService.login(email: email, password: password);
+      final user = await mockService.login(email: email, password: password, role: role);
       _fallbackUser = user;
       _authController.add(user);
       return user;
@@ -82,13 +87,14 @@ class AuthRepository {
     required String name,
     required String email,
     required String password,
+    UserRole role = UserRole.consumer,
   }) async {
     final fbService = _firebaseAuthService;
     final mockService = _mockAuthService;
 
     if (fbService != null) {
       try {
-        final user = await fbService.signUp(name: name, email: email, password: password);
+        final user = await fbService.signUp(name: name, email: email, password: password, role: role);
         _fallbackUser = user;
         _authController.add(user);
         return user;
@@ -98,7 +104,7 @@ class AuthRepository {
     }
 
     if (mockService != null) {
-      final user = await mockService.signUp(name: name, email: email, password: password);
+      final user = await mockService.signUp(name: name, email: email, password: password, role: role);
       _fallbackUser = user;
       _authController.add(user);
       return user;

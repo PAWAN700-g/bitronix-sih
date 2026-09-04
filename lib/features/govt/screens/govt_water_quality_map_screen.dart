@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/govt_inspection_station_model.dart';
 import '../../../repositories/govt_inspection_repository.dart';
@@ -13,13 +15,44 @@ class GovtWaterQualityMapScreen extends ConsumerStatefulWidget {
 
 class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapScreen> {
   GovtWaterInspectionStation? _selectedStation;
+  final MapController _mapController = MapController();
+  String _selectedFilter = 'All'; // 'All', 'District', 'Town', 'Village'
+  int _selectedTileIndex = 0;
+
+  static const List<Map<String, String>> _tileProviders = [
+    {
+      'name': 'CARTO Voyager (Recommended)',
+      'url': 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      'subdomains': 'a,b,c,d',
+    },
+    {
+      'name': 'Esri World Street Map',
+      'url': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      'subdomains': '',
+    },
+    {
+      'name': 'OpenStreetMap Standard',
+      'url': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'subdomains': 'a,b,c',
+    },
+    {
+      'name': 'CARTO Positron Light',
+      'url': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      'subdomains': 'a,b,c,d',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final stations = ref.watch(govtStationsProvider);
-    final verifiedCount = stations.where((s) => s.isVerifiedByGovt).length;
-    final unsafeCount = stations.where((s) => s.purityScore < 50).length;
+    final allStations = ref.watch(govtStationsProvider);
+
+    final filteredStations = _selectedFilter == 'All'
+        ? allStations
+        : allStations.where((s) => s.areaLevel == _selectedFilter).toList();
+
+    final verifiedCount = allStations.where((s) => s.isVerifiedByGovt).length;
+    final unsafeCount = allStations.where((s) => s.purityScore < 50).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +100,7 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
               padding: const EdgeInsets.all(12.0),
               child: Row(
                 children: [
-                  _buildStatTile('Jharkhand Hubs', '${stations.length}', Icons.sensors_outlined, theme.colorScheme.primary),
+                  _buildStatTile('Jharkhand Hubs', '${allStations.length}', Icons.sensors_outlined, theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   _buildStatTile('Verified 🟢', '$verifiedCount', Icons.verified_rounded, AppColors.excellent),
                   const SizedBox(width: 8),
@@ -76,7 +109,39 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
               ),
             ),
 
-            // Spatial GIS Map View Container (Jharkhand State Focus)
+            // Category Level Selector Chips (District, Town, Village)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 2.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip('All (${allStations.length})', 'All', Icons.map_rounded),
+                    const SizedBox(width: 6),
+                    _buildFilterChip(
+                      'Districts (${allStations.where((s) => s.areaLevel == 'District').length})',
+                      'District',
+                      Icons.location_city_rounded,
+                    ),
+                    const SizedBox(width: 6),
+                    _buildFilterChip(
+                      'Towns (${allStations.where((s) => s.areaLevel == 'Town').length})',
+                      'Town',
+                      Icons.holiday_village_rounded,
+                    ),
+                    const SizedBox(width: 6),
+                    _buildFilterChip(
+                      'Villages (${allStations.where((s) => s.areaLevel == 'Village').length})',
+                      'Village',
+                      Icons.home_work_rounded,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // OpenStreetMap Spatial GIS Container (Jharkhand Focus)
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -85,148 +150,148 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
                 ),
-                child: Stack(
-                  children: [
-                    // Jharkhand State Boundary & Topo Grid Painter
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: CustomPaint(
-                          painter: JharkhandStateMapPainter(
-                            gridColor: theme.dividerColor.withValues(alpha: 0.12),
-                            boundaryColor: AppColors.primary.withValues(alpha: 0.35),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Map Title overlay
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface.withValues(alpha: 0.92),
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
-                          ],
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.map_rounded, size: 14, color: AppColors.primary),
-                            SizedBox(width: 6),
-                            Text(
-                              'Jharkhand GIS Water Quality Inspection Map',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Jharkhand Regional Coordinates Pin Overlay
-                    ...stations.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final station = entry.value;
-
-                      // Spatial positions corresponding to Jharkhand geography layout
-                      // (Palamu North-West, Hazaribagh North, Deoghar North-East, Ranchi Center, Dhanbad/Bokaro East, Jamshedpur South-East)
-                      final topOffsets = [190.0, 310.0, 160.0, 195.0, 110.0, 90.0, 75.0];
-                      final leftOffsets = [135.0, 240.0, 230.0, 195.0, 155.0, 260.0, 50.0];
-
-                      final top = topOffsets[idx % topOffsets.length];
-                      final left = leftOffsets[idx % leftOffsets.length];
-                      final pinColor = _getPinColor(station.purityScore);
-
-                      final isSelected = _selectedStation?.id == station.id;
-
-                      return Positioned(
-                        top: top,
-                        left: left,
-                        child: GestureDetector(
-                          onTap: () {
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    children: [
+                      FlutterMap(
+                        mapController: _mapController,
+                        options: MapOptions(
+                          initialCenter: const LatLng(23.6102, 85.2799),
+                          initialZoom: 7.5,
+                          minZoom: 6.0,
+                          maxZoom: 18.0,
+                          onTap: (_, _) {
                             setState(() {
-                              _selectedStation = station;
+                              _selectedStation = null;
                             });
                           },
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: pinColor,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected ? Colors.white : Colors.transparent,
-                                    width: isSelected ? 3 : 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: pinColor.withValues(alpha: 0.5),
-                                      blurRadius: isSelected ? 12 : 6,
-                                      spreadRadius: isSelected ? 2 : 0,
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  station.isVerifiedByGovt ? Icons.verified : Icons.water_drop,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surface.withValues(alpha: 0.95),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: pinColor.withValues(alpha: 0.5)),
-                                ),
-                                child: Text(
-                                  '${station.district} (${station.purityScore.round()})',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: pinColor,
-                                  ),
-                                ),
-                              ),
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate: _tileProviders[_selectedTileIndex]['url']!,
+                            subdomains: _tileProviders[_selectedTileIndex]['subdomains']!.isNotEmpty
+                                ? _tileProviders[_selectedTileIndex]['subdomains']!.split(',')
+                                : const [],
+                            tileProvider: NetworkTileProvider(
+                              headers: {
+                                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+                              },
+                            ),
+                            maxZoom: 19,
+                          ),
+                          MarkerLayer(
+                            markers: _buildFlutterMapMarkers(filteredStations, theme),
+                          ),
+                        ],
+                      ),
+
+                      // Map Header Title overlay
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface.withValues(alpha: 0.92),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
                             ],
                           ),
-                        ),
-                      );
-                    }),
-
-                    if (_selectedStation == null)
-                      Positioned(
-                        bottom: 16,
-                        left: 16,
-                        right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface.withValues(alpha: 0.95),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                          ),
-                          child: const Row(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.touch_app_rounded, color: AppColors.primary, size: 20),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Tap any Jharkhand station pin above to inspect district water metrics & verify Jal Shakti compliance.',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                                ),
+                              const Icon(Icons.map_rounded, size: 14, color: AppColors.primary),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${_tileProviders[_selectedTileIndex]['name']} (Jharkhand)',
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
                         ),
                       ),
-                  ],
+
+                      // Map Layer Selector Button (Top Right)
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: PopupMenuButton<int>(
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface.withValues(alpha: 0.95),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 4),
+                              ],
+                            ),
+                            child: const Icon(Icons.layers_rounded, size: 18, color: AppColors.primary),
+                          ),
+                          tooltip: 'Switch Map Tile Provider',
+                          initialValue: _selectedTileIndex,
+                          onSelected: (index) {
+                            setState(() {
+                              _selectedTileIndex = index;
+                            });
+                          },
+                          itemBuilder: (context) => List.generate(
+                            _tileProviders.length,
+                            (index) => PopupMenuItem<int>(
+                              value: index,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _selectedTileIndex == index
+                                        ? Icons.radio_button_checked_rounded
+                                        : Icons.radio_button_unchecked_rounded,
+                                    size: 16,
+                                    color: _selectedTileIndex == index ? AppColors.primary : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _tileProviders[index]['name']!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: _selectedTileIndex == index ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      if (_selectedStation == null)
+                        Positioned(
+                          bottom: 16,
+                          left: 16,
+                          right: 16,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface.withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.touch_app_rounded, color: AppColors.primary, size: 20),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Tap any District, Town, or Village marker to view purity scores & issue Jal Shakti certificates.',
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -237,6 +302,35 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value, IconData icon) {
+    final isSelected = _selectedFilter == value;
+    return ChoiceChip(
+      avatar: Icon(
+        icon,
+        size: 14,
+        color: isSelected ? Colors.white : AppColors.primary,
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Colors.white : null,
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: AppColors.primary,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _selectedFilter = value;
+            _selectedStation = null;
+          });
+        }
+      },
     );
   }
 
@@ -274,6 +368,106 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
     );
   }
 
+  void _onSelectStation(GovtWaterInspectionStation station) {
+    setState(() {
+      _selectedStation = station;
+    });
+    _mapController.move(
+      LatLng(station.latitude, station.longitude),
+      11.5,
+    );
+  }
+
+  List<Marker> _buildFlutterMapMarkers(List<GovtWaterInspectionStation> stations, ThemeData theme) {
+    return stations.map((station) {
+      final pinColor = _getPinColor(station.purityScore);
+      final isSelected = _selectedStation?.id == station.id;
+
+      IconData levelIcon;
+      switch (station.areaLevel) {
+        case 'District':
+          levelIcon = Icons.location_city_rounded;
+          break;
+        case 'Town':
+          levelIcon = Icons.holiday_village_rounded;
+          break;
+        case 'Village':
+        default:
+          levelIcon = Icons.home_work_rounded;
+          break;
+      }
+
+      return Marker(
+        point: LatLng(station.latitude, station.longitude),
+        width: isSelected ? 120 : 90,
+        height: isSelected ? 54 : 44,
+        child: GestureDetector(
+          onTap: () => _onSelectStation(station),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isSelected ? pinColor : theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: pinColor, width: isSelected ? 2.5 : 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: pinColor.withValues(alpha: isSelected ? 0.5 : 0.2),
+                  blurRadius: isSelected ? 8 : 4,
+                  spreadRadius: isSelected ? 2 : 0,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: pinColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    levelIcon,
+                    size: 12,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        station.district,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                      Text(
+                        '${station.purityScore.round()}% Purity',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected ? Colors.white : pinColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
   Color _getPinColor(double score) {
     if (score >= 80) return AppColors.excellent;
     if (score >= 50) return AppColors.moderate;
@@ -307,6 +501,28 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                          ),
+                          child: Text(
+                            '${station.areaLevel.toUpperCase()} LEVEL',
+                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: statusColor),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          station.category,
+                          style: TextStyle(fontSize: 10, color: theme.textTheme.bodySmall?.color),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       station.stationName,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -424,57 +640,4 @@ class _GovtWaterQualityMapScreenState extends ConsumerState<GovtWaterQualityMapS
       ),
     );
   }
-}
-
-class JharkhandStateMapPainter extends CustomPainter {
-  final Color gridColor;
-  final Color boundaryColor;
-
-  JharkhandStateMapPainter({required this.gridColor, required this.boundaryColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = gridColor
-      ..strokeWidth = 1.0;
-
-    const step = 35.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-
-    // Jharkhand State Stylized Geographic Boundary Path
-    final boundaryPaint = Paint()
-      ..color = boundaryColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2;
-
-    final fillPaint = Paint()
-      ..color = boundaryColor.withValues(alpha: 0.05)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    final w = size.width;
-    final h = size.height;
-
-    // Geographic shape polygon representation for Jharkhand
-    path.moveTo(w * 0.15, h * 0.20); // North-West (Palamu / Garhwa)
-    path.lineTo(w * 0.50, h * 0.15); // North (Hazaribagh / Kodarma)
-    path.lineTo(w * 0.85, h * 0.20); // North-East (Deoghar / Sahibganj)
-    path.lineTo(w * 0.92, h * 0.50); // East (Dhanbad / Bokaro)
-    path.lineTo(w * 0.80, h * 0.82); // South-East (East Singhbhum / Jamshedpur)
-    path.lineTo(w * 0.45, h * 0.88); // South (West Singhbhum)
-    path.lineTo(w * 0.18, h * 0.70); // South-West (Simdega / Gumla)
-    path.lineTo(w * 0.10, h * 0.45); // West (Latehar)
-    path.close();
-
-    canvas.drawPath(path, fillPaint);
-    canvas.drawPath(path, boundaryPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

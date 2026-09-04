@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/theme_provider.dart';
 import '../../../services/share_service.dart';
 import '../../auth/screens/signup_screen.dart';
 import 'feedback_screen.dart';
@@ -16,7 +15,6 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final user = ref.watch(authStateProvider).value;
-    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -98,20 +96,6 @@ class ProfileScreen extends ConsumerWidget {
                   MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()),
                 );
               },
-            ),
-
-            // 3. Theme Toggle
-            ListTile(
-              leading: Icon(
-                themeMode == ThemeMode.dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-              ),
-              title: const Text('Dark Mode'),
-              trailing: Switch(
-                value: themeMode == ThemeMode.dark,
-                onChanged: (val) {
-                  ref.read(themeModeProvider.notifier).toggleTheme();
-                },
-              ),
             ),
 
             // 4. Device Settings

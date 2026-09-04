@@ -15,6 +15,8 @@ class GovtWaterInspectionStation {
   final bool isVerifiedByGovt;
   final DateTime lastInspected;
   final String inspectorNotes;
+  final String category; // 'District HQ', 'Town Hub', 'Village Panchayat'
+  final String areaLevel; // 'District', 'Town', 'Village'
 
   const GovtWaterInspectionStation({
     required this.id,
@@ -33,12 +35,16 @@ class GovtWaterInspectionStation {
     required this.isVerifiedByGovt,
     required this.lastInspected,
     required this.inspectorNotes,
+    this.category = 'District HQ',
+    this.areaLevel = 'District',
   });
 
   GovtWaterInspectionStation copyWith({
     bool? isVerifiedByGovt,
     DateTime? lastInspected,
     String? inspectorNotes,
+    String? category,
+    String? areaLevel,
   }) {
     return GovtWaterInspectionStation(
       id: id,
@@ -57,6 +63,8 @@ class GovtWaterInspectionStation {
       isVerifiedByGovt: isVerifiedByGovt ?? this.isVerifiedByGovt,
       lastInspected: lastInspected ?? this.lastInspected,
       inspectorNotes: inspectorNotes ?? this.inspectorNotes,
+      category: category ?? this.category,
+      areaLevel: areaLevel ?? this.areaLevel,
     );
   }
 }

@@ -30,7 +30,11 @@ class FirebaseAuthService {
     );
   }
 
-  Future<UserModel> login({required String email, required String password}) async {
+  Future<UserModel> login({
+    required String email,
+    required String password,
+    UserRole role = UserRole.consumer,
+  }) async {
     final credential = await _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -39,10 +43,15 @@ class FirebaseAuthService {
     if (user == null) {
       throw Exception('Login failed: User record is null.');
     }
+    final effectiveRole = (email.contains('gov') || email.contains('sih'))
+        ? UserRole.govtAuthority
+        : role;
     return UserModel(
       id: user.uid,
       name: user.displayName ?? user.email?.split('@').first ?? 'User',
       email: user.email ?? email,
+      role: effectiveRole,
+      department: effectiveRole == UserRole.govtAuthority ? 'Jal Shakti Ministry Inspection' : null,
       profilePicUrl: user.photoURL,
     );
   }
@@ -51,6 +60,7 @@ class FirebaseAuthService {
     required String name,
     required String email,
     required String password,
+    UserRole role = UserRole.consumer,
   }) async {
     final credential = await _firebaseAuth.createUserWithEmailAndPassword(
       email: email,
@@ -64,10 +74,15 @@ class FirebaseAuthService {
     // Update display name
     await user.updateDisplayName(name);
 
+    final effectiveRole = (email.contains('gov') || email.contains('sih'))
+        ? UserRole.govtAuthority
+        : role;
     return UserModel(
       id: user.uid,
       name: name,
       email: email,
+      role: effectiveRole,
+      department: effectiveRole == UserRole.govtAuthority ? 'Jal Shakti Ministry Inspection' : null,
     );
   }
 
