@@ -30,4 +30,21 @@ class AppConstants {
   static const String bisTurbidityStandard = '< 1.0 NTU';
   static const String bisSalinityStandard = '< 0.5 ppt';
   static const String bisTempStandard = '15 – 30 °C';
+
+  // Water Quality Index (WQI) Scoring Weights
+  static const double wqiPhWeight = 0.35;
+  static const double wqiTurbidityWeight = 0.40;
+  static const double wqiTdsWeight = 0.25;
+
+  // TDS Scoring Thresholds (BIS IS 10500:2012)
+  static const double tdsDesirable = 300.0;   // BIS desirable limit
+  static const double tdsAcceptable = 500.0;   // BIS acceptable limit
+  static const double tdsPoor = 1000.0;        // Poor quality
+  static const double tdsVeryPoor = 2000.0;    // Very poor quality
+
+  // Screening Score Disclaimer
+  static const String wqiDisclaimer =
+      'Screening score based on pH, TDS & turbidity. '
+      'Does not detect microbiological or chemical contaminants '
+      '(E. coli, arsenic, fluoride, nitrate, lead, pesticides, etc.).';
 }

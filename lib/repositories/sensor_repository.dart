@@ -24,6 +24,10 @@ class SensorRepository {
     return _dataSource.fetchHistoricalReadings(deviceId, days: days);
   }
 
+  Future<void> pushSensorReading(SensorReading reading) {
+    return _dataSource.pushSensorReading(reading);
+  }
+
   WaterQualityResult evaluateQuality(SensorReading reading) {
     return _qualityService.evaluate(reading);
   }

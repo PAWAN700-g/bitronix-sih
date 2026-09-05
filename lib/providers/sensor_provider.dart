@@ -6,6 +6,8 @@ import '../datasources/mock_sensor_datasource.dart';
 import '../models/sensor_reading.dart';
 import '../models/water_quality_result.dart';
 import '../repositories/sensor_repository.dart';
+import '../services/adaptive_sampling_service.dart';
+import '../services/latency_tracker.dart';
 import '../services/water_quality_service.dart';
 import 'demo_mode_provider.dart';
 
@@ -58,3 +60,23 @@ final historicalSensorReadingsProvider = FutureProvider.family<List<SensorReadin
   final repo = ref.watch(sensorRepositoryProvider);
   return repo.getHistoricalReadings(AppConstants.defaultDeviceId, days: days);
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// LATENCY & ADAPTIVE SAMPLING PROVIDERS
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Singleton latency tracker instance.
+final latencyTrackerProvider = Provider<LatencyTracker>((ref) {
+  return LatencyTracker();
+});
+
+/// Singleton adaptive sampling service instance.
+final adaptiveSamplingServiceProvider = Provider<AdaptiveSamplingService>((ref) {
+  return AdaptiveSamplingService();
+});
+
+/// Provides the latest formatted latency string for display.
+final latencyDisplayProvider = StateProvider<String>((ref) => '');
+
+/// Provides the latest adaptive sampling state.
+final adaptiveSamplingStateProvider = StateProvider<AdaptiveSamplingState?>((ref) => null);

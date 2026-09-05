@@ -100,6 +100,11 @@ class MockSensorDataSource implements SensorDataSource {
     return history;
   }
 
+  @override
+  Future<void> pushSensorReading(SensorReading reading) async {
+    emitReading(reading);
+  }
+
   void dispose() {
     _timer?.cancel();
     _controller.close();
