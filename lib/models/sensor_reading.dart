@@ -11,6 +11,9 @@ class SensorReading {
   final double salinity;
   final double temperature;
 
+  /// Water quality status string returned by ESP32 (e.g. "DRINKABLE").
+  final String? status;
+
   /// T1 — When the ESP32 physically measured the sensor value (epoch ms).
   /// Null if ESP32 firmware hasn't been updated to send this field.
   final DateTime? sensorTimestamp;
@@ -31,6 +34,7 @@ class SensorReading {
     required this.turbidity,
     this.salinity = 0.2,
     required this.temperature,
+    this.status,
     this.sensorTimestamp,
     this.firebaseTimestamp,
     this.appReceivedTimestamp,
@@ -44,6 +48,7 @@ class SensorReading {
     double? turbidity,
     double? salinity,
     double? temperature,
+    String? status,
     DateTime? sensorTimestamp,
     DateTime? firebaseTimestamp,
     DateTime? appReceivedTimestamp,
@@ -56,6 +61,7 @@ class SensorReading {
       turbidity: turbidity ?? this.turbidity,
       salinity: salinity ?? this.salinity,
       temperature: temperature ?? this.temperature,
+      status: status ?? this.status,
       sensorTimestamp: sensorTimestamp ?? this.sensorTimestamp,
       firebaseTimestamp: firebaseTimestamp ?? this.firebaseTimestamp,
       appReceivedTimestamp: appReceivedTimestamp ?? this.appReceivedTimestamp,
@@ -89,18 +95,22 @@ class SensorReading {
       'turbidity': turbidity,
       'salinity': salinity,
       'temperature': temperature,
+      if (status != null) 'status': status,
     };
   }
 
   factory SensorReading.fromJson(Map<String, dynamic> json) {
     return SensorReading(
-      deviceId: json['deviceId'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-      ph: (json['ph'] as num).toDouble(),
-      tds: (json['tds'] as num).toDouble(),
-      turbidity: (json['turbidity'] as num).toDouble(),
+      deviceId: (json['deviceId'] as String?) ?? 'ESP001',
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      ph: (json['ph'] as num?)?.toDouble() ?? 7.0,
+      tds: (json['tds'] as num?)?.toDouble() ?? 0.0,
+      turbidity: (json['turbidity'] as num?)?.toDouble() ?? 0.0,
       salinity: (json['salinity'] as num?)?.toDouble() ?? 0.2,
-      temperature: (json['temperature'] as num).toDouble(),
+      temperature: (json['temperature'] as num?)?.toDouble() ?? 25.0,
+      status: json['status'] as String?,
     );
   }
 }

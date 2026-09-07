@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../providers/device_provider.dart';
 import '../../../providers/sensor_provider.dart';
 import '../../../services/share_service.dart';
 import '../widgets/before_after_comparison_card.dart';
@@ -13,9 +13,10 @@ class AnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final activeDeviceId = ref.watch(selectedDeviceProvider);
     final selectedDays = ref.watch(selectedTimeFilterProvider);
     final historyAsync = ref.watch(historicalSensorReadingsProvider(selectedDays));
-    final liveReadingAsync = ref.watch(liveSensorStreamProvider(AppConstants.defaultDeviceId));
+    final liveReadingAsync = ref.watch(liveSensorStreamProvider(activeDeviceId));
 
     return Scaffold(
       appBar: AppBar(

@@ -39,13 +39,14 @@ class FirebaseSensorDataSource implements SensorDataSource {
             .snapshots()
             .listen(
           (docSnap) {
+            debugPrint('🔥 [Firestore docSnap] exists=${docSnap.exists}, id=${docSnap.id}, data=${docSnap.data()}');
             if (docSnap.exists && docSnap.data() != null) {
               final reading = _parseFirestoreDoc(deviceId, docSnap.data()!);
               if (!controller.isClosed) controller.add(reading);
             }
           },
           onError: (err) {
-            debugPrint('Firestore document stream notice ($err). Falling back to subcollection...');
+            debugPrint('❌ [Firestore doc stream error] ($err). Falling back to subcollection...');
           },
         );
 
@@ -59,14 +60,16 @@ class FirebaseSensorDataSource implements SensorDataSource {
             .snapshots()
             .listen(
           (snapshot) {
+            debugPrint('🔥 [Firestore readings subcoll] docs count=${snapshot.docs.length}');
             if (snapshot.docs.isNotEmpty) {
               final doc = snapshot.docs.first;
+              debugPrint('🔥 [Firestore subcoll doc] data=${doc.data()}');
               final reading = _parseFirestoreDoc(deviceId, doc.data());
               if (!controller.isClosed) controller.add(reading);
             }
           },
           onError: (err) {
-            debugPrint('Firestore subcollection stream notice ($err).');
+            debugPrint('❌ [Firestore subcollection stream error] ($err).');
           },
         );
       },
@@ -156,21 +159,68 @@ class FirebaseSensorDataSource implements SensorDataSource {
   }
 
   SensorReading _parseFirestoreDoc(String deviceId, Map<String, dynamic> data) {
-    DateTime timestamp = DateTime.now();
-    if (data['timestamp'] is Timestamp) {
-      timestamp = (data['timestamp'] as Timestamp).toDate();
-    } else if (data['timestamp'] is String) {
-      timestamp = DateTime.tryParse(data['timestamp'] as String) ?? DateTime.now();
+    final DateTime appReceived = DateTime.now(); // T4
+
+    // Helper to safely extract double from either num or String, checking multiple possible keys
+    double parseDouble(List<String> keys, double fallback) {
+      for (final key in keys) {
+        if (data.containsKey(key) && data[key] != null) {
+          final val = data[key];
+          if (val is num) return val.toDouble();
+          if (val is String) {
+            final parsed = double.tryParse(val);
+            if (parsed != null) return parsed;
+          }
+        }
+      }
+      return fallback;
     }
+
+    // Parse primary timestamp (T3 — Firestore server timestamp)
+    DateTime timestamp = appReceived;
+    DateTime? firebaseTimestamp;
+    final dynamic rawTs = data['timestamp'] ?? data['time'] ?? data['created_at'] ?? data['lastUpdated'];
+    if (rawTs is Timestamp) {
+      timestamp = rawTs.toDate();
+      firebaseTimestamp = timestamp;
+    } else if (rawTs is String) {
+      timestamp = DateTime.tryParse(rawTs) ?? appReceived;
+      firebaseTimestamp = timestamp;
+    } else if (rawTs is int) {
+      timestamp = DateTime.fromMillisecondsSinceEpoch(rawTs);
+      firebaseTimestamp = timestamp;
+    }
+
+    // Parse sensor_timestamp (T1 — when ESP32 measured the value)
+    DateTime? sensorTimestamp;
+    final dynamic rawSensorTs = data['sensor_timestamp'] ?? data['sensorTimestamp'];
+    if (rawSensorTs is int) {
+      sensorTimestamp = DateTime.fromMillisecondsSinceEpoch(rawSensorTs);
+    } else if (rawSensorTs is Timestamp) {
+      sensorTimestamp = rawSensorTs.toDate();
+    } else if (rawSensorTs is String) {
+      sensorTimestamp = DateTime.tryParse(rawSensorTs);
+    }
+
+    final double ph = parseDouble(['ph', 'pH', 'ph_level', 'phLevel', 'PH'], 7.2);
+    final double tds = parseDouble(['tds', 'TDS', 'tds_level', 'tdsLevel', 'ppm'], 180.0);
+    final double turbidity = parseDouble(['turbidity', 'Turbidity', 'ntu', 'NTU', 'turb'], 0.8);
+    final double salinity = parseDouble(['salinity', 'Salinity', 'sal', 'ppt'], 0.15);
+    final double temperature = parseDouble(['temperature', 'Temperature', 'temp', 'Temp'], 24.5);
+
+    debugPrint('🔥 [Firestore] Parsed reading for $deviceId: pH=$ph, TDS=$tds, Turbidity=$turbidity, Salinity=$salinity, Temp=$temperature');
 
     return SensorReading(
       deviceId: deviceId,
       timestamp: timestamp,
-      ph: (data['ph'] as num?)?.toDouble() ?? 7.2,
-      tds: (data['tds'] as num?)?.toDouble() ?? 180.0,
-      turbidity: (data['turbidity'] as num?)?.toDouble() ?? 0.8,
-      salinity: (data['salinity'] as num?)?.toDouble() ?? 0.15,
-      temperature: (data['temperature'] as num?)?.toDouble() ?? 24.5,
+      ph: ph,
+      tds: tds,
+      turbidity: turbidity,
+      salinity: salinity,
+      temperature: temperature,
+      sensorTimestamp: sensorTimestamp,
+      firebaseTimestamp: firebaseTimestamp,
+      appReceivedTimestamp: appReceived,
     );
   }
 }

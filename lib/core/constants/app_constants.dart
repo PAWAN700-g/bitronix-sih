@@ -21,20 +21,20 @@ class AppConstants {
   static const double salinityMaxOptimal = 0.5; // ppt (parts per thousand)
   static const double salinityMaxAcceptable = 1.0; // ppt
 
-  static const double tempMinOptimal = 15.0;
+  static const double tempMinOptimal = 20.0;
   static const double tempMaxOptimal = 30.0;
 
   // Indian Standard BIS IS 10500:2012 Safe Limit Strings
   static const String bisPhStandard = '6.5 – 8.5';
   static const String bisTdsStandard = '< 500 ppm';
-  static const String bisTurbidityStandard = '< 1.0 NTU';
+  static const String bisTurbidityStandard = '< 5.0 NTU';
   static const String bisSalinityStandard = '< 0.5 ppt';
-  static const String bisTempStandard = '15 – 30 °C';
+  static const String bisTempStandard = '20 – 30 °C';
 
   // Water Quality Index (WQI) Scoring Weights
-  static const double wqiPhWeight = 0.35;
   static const double wqiTurbidityWeight = 0.40;
-  static const double wqiTdsWeight = 0.25;
+  static const double wqiTdsWeight = 0.35;
+  static const double wqiPhWeight = 0.25;
 
   // TDS Scoring Thresholds (BIS IS 10500:2012)
   static const double tdsDesirable = 300.0;   // BIS desirable limit

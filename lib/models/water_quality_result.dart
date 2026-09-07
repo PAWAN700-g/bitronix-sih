@@ -19,7 +19,7 @@ extension WaterGradeX on WaterGrade {
       case WaterGrade.poor:
         return 'Poor';
       case WaterGrade.veryPoor:
-        return 'Very Poor';
+        return 'Critical';
     }
   }
 }

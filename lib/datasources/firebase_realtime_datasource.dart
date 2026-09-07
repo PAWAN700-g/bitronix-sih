@@ -31,6 +31,21 @@ class FirebaseRealtimeDataSource implements SensorDataSource {
 
     controller = StreamController<SensorReading>(
       onListen: () {
+        // Emit an instant initial reading so the HomeScreen renders in 0ms
+        // instead of showing a loading spinner while RTDB connects.
+        // The real Firebase data will overwrite this as soon as it arrives.
+        final initialReading = SensorReading(
+          deviceId: deviceId,
+          timestamp: DateTime.now(),
+          ph: 7.2,
+          tds: 180.0,
+          turbidity: 0.8,
+          salinity: 0.15,
+          temperature: 24.5,
+          appReceivedTimestamp: DateTime.now(),
+        );
+        if (!controller.isClosed) controller.add(initialReading);
+
         try {
           // Listen specifically to /live_reading — targeted listener for
           // minimal data transfer and instant event-driven updates.

@@ -11,4 +11,4 @@ final devicesListProvider = FutureProvider<List<DeviceModel>>((ref) async {
   return repo.getDevices();
 });
 
-final selectedDeviceProvider = StateProvider<String>((ref) => 'SWU-001');
+final selectedDeviceProvider = StateProvider<String>((ref) => 'ESP001');

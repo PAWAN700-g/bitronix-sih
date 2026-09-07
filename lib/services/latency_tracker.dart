@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'package:flutter/foundation.dart';
 
 /// Represents a single latency measurement sample in the sensor pipeline.
 class LatencySample {

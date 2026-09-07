@@ -122,7 +122,6 @@ class WaterQualityService {
 
   SensorStatus _getPhStatus(double ph) {
     if (ph >= 6.5 && ph <= 8.5) return SensorStatus.normal;
-    if (ph >= 6.0 && ph <= 9.0) return SensorStatus.warning;
     return SensorStatus.critical;
   }
 
@@ -152,8 +151,7 @@ class WaterQualityService {
   }
 
   SensorStatus _getTurbidityStatus(double turbidity) {
-    if (turbidity <= AppConstants.turbidityMaxOptimal) return SensorStatus.normal;
-    if (turbidity <= AppConstants.turbidityMaxAcceptable) return SensorStatus.warning;
+    if (turbidity <= 5.0) return SensorStatus.normal;
     return SensorStatus.critical;
   }
 
@@ -190,8 +188,7 @@ class WaterQualityService {
   }
 
   SensorStatus _getTdsStatus(double tds) {
-    if (tds <= AppConstants.tdsMaxOptimal) return SensorStatus.good;
-    if (tds <= AppConstants.tdsMaxAcceptable) return SensorStatus.warning;
+    if (tds <= 500.0) return SensorStatus.normal;
     return SensorStatus.critical;
   }
 
@@ -200,20 +197,15 @@ class WaterQualityService {
   // ═══════════════════════════════════════════════════════════════════════
 
   SensorStatus _getSalinityStatus(double salinity) {
-    if (salinity <= AppConstants.salinityMaxOptimal) return SensorStatus.normal;
-    if (salinity <= AppConstants.salinityMaxAcceptable) return SensorStatus.warning;
+    if (salinity <= 0.5) return SensorStatus.normal;
     return SensorStatus.critical;
   }
 
   SensorStatus _getTempStatus(double temperature) {
-    if (temperature >= AppConstants.tempMinOptimal &&
-        temperature <= AppConstants.tempMaxOptimal) {
+    if (temperature >= 20.0 && temperature <= 30.0) {
       return SensorStatus.normal;
     }
-    final distFromRange = temperature < AppConstants.tempMinOptimal
-        ? AppConstants.tempMinOptimal - temperature
-        : temperature - AppConstants.tempMaxOptimal;
-    return distFromRange > 8.0 ? SensorStatus.warning : SensorStatus.normal;
+    return SensorStatus.critical;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -246,7 +238,7 @@ class WaterQualityService {
     String valueStr;
     switch (worst.key) {
       case 'pH':
-        valueStr = '${reading.ph.toStringAsFixed(1)}';
+        valueStr = reading.ph.toStringAsFixed(1);
         break;
       case 'TDS':
         valueStr = '${reading.tds.toStringAsFixed(0)} ppm';
